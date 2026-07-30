@@ -1,40 +1,80 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Rocket } from "lucide-react";
 import { PrimaryButton, SecondaryButton } from "./ui/Button";
+import { createClient } from "@/lib/supabase/client";
+import SignOutButton from "./Auth/SignOutButton";
 
-const navLinks = ["Home", "Courses", "Mock Tests", "Pricing", "About", "Contact"];
+const navLinks = [
+  { label: "Home", href: "/#top" },
+  { label: "Courses", href: "/#" },
+  { label: "Mock Tests", href: "/#" },
+  { label: "Pricing", href: "/#pricing" },
+  { label: "About", href: "/#" },
+  { label: "Contact", href: "/#" },
+];
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const [checked, setChecked] = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user ?? null);
+      setChecked(true);
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => listener.subscription.unsubscribe();
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4" aria-label="Primary">
-        <a href="#top" className="flex items-center gap-2 font-display text-xl font-semibold text-slate-900">
+        <Link href="/#top" className="flex items-center gap-2 font-display text-xl font-semibold text-slate-900">
           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-900 text-amber-400">
             <Rocket size={18} aria-hidden="true" />
           </span>
           PrepNova
-        </a>
+        </Link>
 
         <ul className="hidden items-center gap-8 lg:flex">
           {navLinks.map((link) => (
-            <li key={link}>
-              <a href="#" className="font-body text-sm font-medium text-slate-600 transition hover:text-slate-900">
-                {link}
-              </a>
+            <li key={link.label}>
+              <Link href={link.href} className="font-body text-sm font-medium text-slate-600 transition hover:text-slate-900">
+                {link.label}
+              </Link>
             </li>
           ))}
         </ul>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <button className="font-body text-sm font-semibold text-slate-700 hover:text-slate-900">
-            Login
-          </button>
-          <PrimaryButton className="px-5 py-2.5">Get Started</PrimaryButton>
+          {!checked ? null : user ? (
+            <>
+              <Link href="/dashboard" className="font-body text-sm font-semibold text-slate-700 hover:text-slate-900">
+                Dashboard
+              </Link>
+              <SignOutButton />
+            </>
+          ) : (
+            <>
+              <Link href="/login" className="font-body text-sm font-semibold text-slate-700 hover:text-slate-900">
+                Login
+              </Link>
+              <Link href="/login">
+                <PrimaryButton className="px-5 py-2.5">Get Started</PrimaryButton>
+              </Link>
+            </>
+          )}
         </div>
 
         <button
@@ -57,15 +97,30 @@ const Navbar = () => {
           >
             <ul className="flex flex-col gap-1 px-6 py-4">
               {navLinks.map((link) => (
-                <li key={link}>
-                  <a href="#" className="block py-2 font-body text-sm font-medium text-slate-700">
-                    {link}
-                  </a>
+                <li key={link.label}>
+                  <Link href={link.href} className="block py-2 font-body text-sm font-medium text-slate-700">
+                    {link.label}
+                  </Link>
                 </li>
               ))}
               <li className="mt-2 flex gap-3">
-                <SecondaryButton className="flex-1 px-4 py-2.5">Login</SecondaryButton>
-                <PrimaryButton className="flex-1 px-4 py-2.5">Get Started</PrimaryButton>
+                {user ? (
+                  <>
+                    <Link href="/dashboard" className="flex-1">
+                      <SecondaryButton className="w-full px-4 py-2.5">Dashboard</SecondaryButton>
+                    </Link>
+                    <SignOutButton className="flex-1 justify-center px-4 py-2.5" />
+                  </>
+                ) : (
+                  <>
+                    <Link href="/login" className="flex-1">
+                      <SecondaryButton className="w-full px-4 py-2.5">Login</SecondaryButton>
+                    </Link>
+                    <Link href="/login" className="flex-1">
+                      <PrimaryButton className="w-full px-4 py-2.5">Get Started</PrimaryButton>
+                    </Link>
+                  </>
+                )}
               </li>
             </ul>
           </motion.div>

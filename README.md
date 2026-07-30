@@ -143,8 +143,54 @@ English — it writes and commits the code, and can push straight to this GitHub
 
 ---
 
-## 5. Notes
+## 5. Login system (Super Admin + Users)
 
-- The Login and Get Started buttons on the homepage are currently placeholders (no backend wired up).
+There are now two separate logins:
+- **`/login`** — regular users, sign up or sign in (with a "Forgot to confirm your email?" style
+  confirmation step built in)
+- **`/admin/login`** — Super Admin only. This is not linked anywhere in the public navigation on
+  purpose — you go to it directly by typing the URL.
+
+Protected pages:
+- **`/dashboard`** — any signed-in user; shows their plan (Free/Premium) from the `subscriptions`
+  table the Razorpay webhook writes to
+- **`/admin`** — only accessible to a user whose `profiles.is_admin` is `true`; this is where you
+  create topic-wise tests and set a price per test (₹0 = free)
+
+### One-time setup
+
+1. **Run the updated `supabase/schema.sql`** in Supabase SQL Editor (it now also creates a
+   `profiles` table and a `tests` table — safe to re-run even if you ran an earlier version before,
+   since it uses `if not exists` / `drop ... if exists`).
+2. **Make yourself the admin:**
+   - Go to your live site's `/login`, switch to **Sign Up**, create an account with your own email
+   - Check your email and click the confirmation link (Supabase sends this by default)
+   - In Supabase → **Table Editor → profiles**, find the row with your email, edit it, and set
+     `is_admin` to `true`
+   - Now go to `/admin/login` and sign in with that same email/password — you're in.
+3. **Check Supabase Auth URL settings** (this trips people up): go to Supabase →
+   **Authentication → URL Configuration**, and set:
+   - **Site URL**: `https://your-vercel-domain.vercel.app`
+   - **Redirect URLs**: add `https://your-vercel-domain.vercel.app/auth/callback`
+   Without this, the email confirmation link will redirect to the wrong place.
+
+No new environment variables are needed for this — it reuses the same `NEXT_PUBLIC_SUPABASE_URL`,
+`NEXT_PUBLIC_SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` you already set up.
+
+### What's still a placeholder
+- The admin panel currently lets you create a test's **topic, title, description, and price** —
+  it does not yet include a question-builder (adding actual MCQs) or a page where users take the
+  test. That's the natural next step once you're ready.
+- There's no "Forgot password" flow yet.
+- Premium gating (hiding a test's content until the user's plan is Premium) isn't wired into a
+  public course page yet, since that page doesn't exist yet either — this only gates `/dashboard`
+  and `/admin` so far.
+
+
+
+## 6. Notes
+
+- Login is fully wired up now (see Section 5) — Login/Get Started take you to `/login`, and the
+  navbar shows Dashboard/Sign out once you're signed in.
 - Colors, fonts, and copy are easy to change in `tailwind.config.js` and the component files.
 - All images are hand-drawn SVG (no external image dependencies), so the site loads fast.

@@ -20,7 +20,7 @@ const Pricing = () => {
   const [showCheckout, setShowCheckout] = useState(false);
 
   return (
-    <section className="bg-[#FAF9F6] py-20">
+    <section id="pricing" className="bg-[#FAF9F6] py-20">
       <div className="mx-auto max-w-5xl px-6">
         <SectionHeading eyebrow="Plans" title="Simple, honest pricing" center />
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
