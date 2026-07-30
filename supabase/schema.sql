@@ -14,6 +14,7 @@ alter table subscriptions enable row level security;
 
 -- Once you add Supabase Auth, a logged-in user can read their own row like this
 -- (their auth email must match the email column):
+drop policy if exists "Users can view their own subscription" on subscriptions;
 create policy "Users can view their own subscription"
   on subscriptions for select
   using (auth.jwt() ->> 'email' = email);
@@ -37,10 +38,12 @@ create table if not exists profiles (
 
 alter table profiles enable row level security;
 
+drop policy if exists "Users can view their own profile" on profiles;
 create policy "Users can view their own profile"
   on profiles for select
   using (auth.uid() = id);
 
+drop policy if exists "Users can update their own profile" on profiles;
 create policy "Users can update their own profile"
   on profiles for update
   using (auth.uid() = id);
@@ -84,6 +87,7 @@ alter table tests enable row level security;
 
 -- The test catalog is public — anyone can browse topics and prices,
 -- even logged-out visitors. Only admin API routes (service role) can write.
+drop policy if exists "Tests are publicly readable" on tests;
 create policy "Tests are publicly readable"
   on tests for select
   using (true);
