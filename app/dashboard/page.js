@@ -42,12 +42,18 @@ export default async function DashboardPage() {
         )}
       </div>
 
-      <div className="mt-8 flex gap-4">
+      <div className="mt-8 flex flex-wrap gap-4">
         <Link href="/courses" className="font-body text-sm font-semibold text-slate-700 hover:text-slate-900">
           Browse Courses →
         </Link>
+        <Link href="/materials" className="font-body text-sm font-semibold text-slate-700 hover:text-slate-900">
+          Browse Materials →
+        </Link>
         <Link href="/tests" className="font-body text-sm font-semibold text-slate-700 hover:text-slate-900">
           Browse Mock Tests →
+        </Link>
+        <Link href="/results" className="font-body text-sm font-semibold text-slate-700 hover:text-slate-900">
+          My Results →
         </Link>
       </div>
     </main>

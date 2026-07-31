@@ -290,8 +290,33 @@ guessing the URL.
 The student Dashboard now links to both pages under "Browse Courses" / "Browse Mock Tests".
 
 ### Still open
-- No "My Results" page yet for students (see the note in Section 7)
 - Only one question type (single-answer multiple choice) — no partial credit, negative marking, or
-  a timer yet
-- The 5-choice "Free vs Premium" rule is currently just "price is 0 or not" — no per-category or
-  time-limited free trial logic
+  a timer that cuts off a test (time is only recorded, not enforced)
+- The "Free vs Premium" rule is a simple flag per item — no per-category or time-limited free trial
+
+
+## 10. Materials, feedback messages, and result analysis
+
+**Materials** (`/admin/materials` for the admin, `/materials` for students) — a new content type
+alongside Tests, sitting under a Category:
+- Four types: **Link**, **PDF**, **Video** (all just a URL, opened in a new tab), or **Note** (plain
+  text, shown in an expandable "Read note" section right on the page)
+- Each one is marked **Free** or **Premium** with a checkbox — Premium items show a locked state to
+  non-subscribers, and — same security approach as Tests — **the actual URL is never sent to the
+  browser** for someone who isn't allowed to see it. It's not just hidden with CSS; it's absent
+  from the page's HTML entirely for a Free user looking at a Premium item.
+- New nav link: **Materials**, alongside Courses and Mock Tests
+
+**Post-test feedback** — when a student finishes a test, they now see a reaction pulled from three
+score-based pools (≥80%, 50–79%, below 50%), each with an emoji and a short message — genuinely
+encouraging for a strong score, still kind and lightly humorous for a weak one (never mocking).
+A new one is picked at random each time, so it doesn't feel repetitive. Edit the message pools
+directly in `lib/resultMessages.js` any time.
+
+**Result analysis** — the results screen now shows, beyond right/wrong per question:
+- Score as a percentage, with a progress bar
+- Correct / Incorrect / Unanswered counts, side by side
+- Time taken to complete the test
+
+**My Results** (`/results`) — a new page where a student sees every test they've ever attempted,
+their score on each, and their average percentage across all attempts. Linked from the Dashboard.

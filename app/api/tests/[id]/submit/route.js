@@ -13,7 +13,7 @@ export async function POST(request, { params }) {
     return NextResponse.json({ error: "Premium required" }, { status: 403 });
   }
 
-  const { answers } = await request.json();
+  const { answers, time_taken_seconds } = await request.json();
 
   // Scoring happens here, server-side, against the real correct_option —
   // the client never receives correct answers until this response.
@@ -45,6 +45,7 @@ export async function POST(request, { params }) {
     email: user.email,
     score,
     total_questions: questions.length,
+    time_taken_seconds: Number(time_taken_seconds) || null,
   });
 
   return NextResponse.json({ score, total: questions.length, results });

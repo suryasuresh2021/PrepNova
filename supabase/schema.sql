@@ -188,3 +188,31 @@ create table if not exists payments (
 alter table payments enable row level security;
 -- No public policy — only the webhook (service role) writes here,
 -- and only admin API routes (service role) read the full ledger.
+
+
+-- ============================================================
+-- Materials — reading materials/links under a Category, free or premium
+-- ============================================================
+
+create table if not exists materials (
+  id uuid primary key default gen_random_uuid(),
+  category_id uuid references categories(id) on delete cascade,
+  title text not null,
+  description text,
+  material_type text not null default 'link', -- 'link' | 'pdf' | 'video' | 'note'
+  url text,
+  content text,
+  is_premium boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+alter table materials enable row level security;
+-- No public policy — served only through server components/API routes using the
+-- service role, so a premium material's URL is never exposed to a Free user's page.
+
+
+-- ============================================================
+-- Track how long a test attempt took (for result analysis)
+-- ============================================================
+
+alter table test_attempts add column if not exists time_taken_seconds integer;

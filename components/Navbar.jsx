@@ -11,6 +11,7 @@ import SignOutButton from "./Auth/SignOutButton";
 const navLinks = [
   { label: "Home", href: "/#top" },
   { label: "Courses", href: "/courses" },
+  { label: "Materials", href: "/materials" },
   { label: "Mock Tests", href: "/tests" },
   { label: "Pricing", href: "/#pricing" },
   { label: "About", href: "/#" },
