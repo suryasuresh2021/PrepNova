@@ -1,45 +1,39 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Trash2, Plus, Loader2, Search } from "lucide-react";
+import { Trash2, Pencil } from "lucide-react";
+import SingleQuestionForm, { type QuestionFormValues } from "./SingleQuestionForm";
+import BulkQuestionUpload from "./BulkQuestionUpload";
+import AIQuestionGenerator from "./AIQuestionGenerator";
+import MathText from "./MathText";
 
 type Test = { id: string; title: string };
-
 type Question = {
   id: string;
+  test_id: string;
   question_text: string;
   options: string[];
   correct_option: number;
   tests: { title: string } | null;
 };
 
-const emptyOptions = ["", "", "", ""];
+type Tab = "single" | "bulk" | "ai";
 
 export default function QuestionBankManager() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [tests, setTests] = useState<Test[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-
-  const [testId, setTestId] = useState("");
-  const [questionText, setQuestionText] = useState("");
-  const [options, setOptions] = useState<string[]>(emptyOptions);
-  const [correctOption, setCorrectOption] = useState(0);
-
-  const [search, setSearch] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [tab, setTab] = useState<Tab>("single");
+  const [editing, setEditing] = useState<(QuestionFormValues & { id: string }) | null>(null);
 
   const load = async () => {
     setLoading(true);
-
     const [questionsRes, testsRes] = await Promise.all([
       fetch("/api/admin/questions"),
       fetch("/api/admin/tests"),
     ]);
-
     if (questionsRes.ok) setQuestions(await questionsRes.json());
     if (testsRes.ok) setTests(await testsRes.json());
-
     setLoading(false);
   };
 
@@ -47,211 +41,109 @@ export default function QuestionBankManager() {
     load();
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    setSaving(true);
-    setError(null);
-
-    const res = await fetch("/api/admin/questions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        test_id: testId,
-        question_text: questionText,
-        options,
-        correct_option: correctOption,
-      }),
-    });
-
-    if (res.ok) {
-      setQuestionText("");
-      setOptions(emptyOptions);
-      setCorrectOption(0);
-      await load();
-    } else {
-      const data = await res.json();
-      setError(data.error || "Could not save question");
-    }
-
-    setSaving(false);
-  };
-
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this question?")) return;
-
-    await fetch(`/api/admin/questions/${id}`, {
-      method: "DELETE",
-    });
-
+    await fetch(`/api/admin/questions/${id}`, { method: "DELETE" });
+    if (editing?.id === id) setEditing(null);
     await load();
   };
 
-  const filteredQuestions = questions.filter((q) =>
-    q.question_text.toLowerCase().includes(search.toLowerCase())
-  );
+  const startEdit = (q: Question) => {
+    setEditing({
+      id: q.id,
+      test_id: q.test_id,
+      question_text: q.question_text,
+      options: [...q.options, "", "", "", ""].slice(0, 4),
+      correct_option: q.correct_option,
+    });
+    setTab("single");
+  };
+
+  const handleSaved = async () => {
+    setEditing(null);
+    await load();
+  };
 
   if (!loading && tests.length === 0) {
     return (
       <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
-        <p className="text-sm text-amber-800">
-          Create at least one Test first — questions attach to a test.
-        </p>
+        <p className="font-body text-sm text-amber-800">Create at least one Test first — questions attach to a test.</p>
       </div>
     );
   }
 
+  const tabs: { key: Tab; label: string }[] = [
+    { key: "single", label: editing ? "Edit Question" : "Add Single" },
+    { key: "bulk", label: "Bulk Upload" },
+    { key: "ai", label: "AI Generate" },
+  ];
+
   return (
     <div className="space-y-6">
-
-      {/* Add Question */}
-
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6"
-      >
-        <select
-          required
-          value={testId}
-          onChange={(e) => setTestId(e.target.value)}
-          className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm"
-        >
-          <option value="">Select Test</option>
-
-          {tests.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.title}
-            </option>
-          ))}
-        </select>
-
-        <textarea
-          required
-          rows={3}
-          placeholder="Enter Question"
-          value={questionText}
-          onChange={(e) => setQuestionText(e.target.value)}
-          className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm"
-        />
-
-        <div className="space-y-2">
-          {options.map((opt, i) => (
-            <div key={i} className="flex items-center gap-3">
-              <input
-                type="radio"
-                checked={correctOption === i}
-                onChange={() => setCorrectOption(i)}
-              />
-
-              <input
-                value={opt}
-                placeholder={`Option ${i + 1}`}
-                onChange={(e) => {
-                  const next = [...options];
-                  next[i] = e.target.value;
-                  setOptions(next);
-                }}
-                className="w-full rounded-lg border border-slate-300 px-4 py-2"
-              />
-            </div>
-          ))}
-        </div>
-
-        <button
-          disabled={saving}
-          className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-5 py-2.5 text-white"
-        >
-          {saving ? (
-            <Loader2 className="animate-spin" size={18} />
-          ) : (
-            <Plus size={18} />
-          )}
-
-          Add Question
-        </button>
-
-        {error && (
-          <p className="text-red-600 text-sm">{error}</p>
-        )}
-      </form>
-
-      {/* Question List */}
-
-      <div className="rounded-2xl border border-slate-200 bg-white p-6">
-
-        <div className="mb-5 flex items-center justify-between">
-
-          <h2 className="text-lg font-semibold">
-            All Questions ({filteredQuestions.length})
-          </h2>
-
-          <div className="relative">
-
-            <Search
-              size={18}
-              className="absolute left-3 top-2.5 text-slate-400"
-            />
-
-            <input
-              type="text"
-              placeholder="Search Questions..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-72 rounded-lg border border-slate-300 pl-10 pr-4 py-2 text-sm"
-            />
-
-          </div>
-
-        </div>
-
-        {loading ? (
-          <p>Loading...</p>
-        ) : filteredQuestions.length === 0 ? (
-          <p>No Questions Found.</p>
-        ) : (
-          <ul className="divide-y divide-slate-200">
-
-            {filteredQuestions.map((q) => (
-
-              <li
-                key={q.id}
-                className="flex items-start justify-between py-4"
-              >
-
-                <div>
-
-                  <p className="text-xs font-semibold text-teal-700">
-                    {q.tests?.title}
-                  </p>
-
-                  <p className="mt-1 font-medium">
-                    {q.question_text}
-                  </p>
-
-                  <p className="mt-2 text-sm text-slate-500">
-                    ✅ Correct Answer : {q.options[q.correct_option]}
-                  </p>
-
-                </div>
-
-                <button
-                  onClick={() => handleDelete(q.id)}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  <Trash2 size={18} />
-                </button>
-
-              </li>
-
-            ))}
-
-          </ul>
-        )}
-
+      <div className="flex gap-1 rounded-lg bg-slate-100 p-1 sm:w-fit">
+        {tabs.map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={`rounded-md px-4 py-2 text-sm font-semibold transition ${
+              tab === t.key ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
 
+      {tab === "single" && (
+        <SingleQuestionForm
+          tests={tests}
+          initial={editing ?? undefined}
+          onSaved={handleSaved}
+          onCancelEdit={() => setEditing(null)}
+        />
+      )}
+      {tab === "bulk" && <BulkQuestionUpload tests={tests} />}
+      {tab === "ai" && <AIQuestionGenerator tests={tests} />}
+
+      <div className="rounded-2xl border border-slate-200 bg-white p-6">
+        <h2 className="font-display text-base font-semibold text-slate-900">All Questions</h2>
+        {loading ? (
+          <p className="font-body mt-3 text-sm text-slate-500">Loading…</p>
+        ) : questions.length === 0 ? (
+          <p className="font-body mt-3 text-sm text-slate-500">No questions yet.</p>
+        ) : (
+          <ul className="mt-4 divide-y divide-slate-100">
+            {questions.map((q) => (
+              <li key={q.id} className="flex items-start justify-between gap-4 py-3">
+                <div>
+                  <p className="font-body text-xs font-medium text-teal-700">{q.tests?.title}</p>
+                  <p className="font-body text-sm font-semibold text-slate-900">
+                    <MathText text={q.question_text} />
+                  </p>
+                  <p className="font-body mt-1 text-xs text-slate-500">
+                    Correct: <MathText text={q.options[q.correct_option] ?? ""} />
+                  </p>
+                </div>
+                <div className="flex flex-shrink-0 items-center gap-3">
+                  <button
+                    onClick={() => startEdit(q)}
+                    aria-label="Edit question"
+                    className="text-slate-400 transition hover:text-teal-600"
+                  >
+                    <Pencil size={18} aria-hidden="true" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(q.id)}
+                    aria-label="Delete question"
+                    className="text-slate-400 transition hover:text-red-600"
+                  >
+                    <Trash2 size={18} aria-hidden="true" />
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }

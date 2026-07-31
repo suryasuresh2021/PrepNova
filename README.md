@@ -230,6 +230,37 @@ safe to run the whole file again even though earlier parts already exist, thanks
 - **The actual test-taking experience for regular users** — right now the admin can create tests
   and add questions, but there's no page where a logged-in user takes a test and gets a score.
   This is the biggest remaining piece.
-- Editing an existing Category/Topic/Test/Question (currently create + delete only, no update)
+- Editing an existing Category/Topic/Test (Questions can now be edited — see Section 8)
 - Making the Premium price editable from the dashboard instead of in code
 - Search and notifications in the top bar are visual only — not wired to real data yet
+
+
+## 8. Question Bank: bulk upload, editing, AI generation, and math
+
+The Question Bank (`/admin/question-bank`) now has three ways to add questions, plus editing:
+
+**Add Single** — the original one-at-a-time form, now with a live preview underneath the question
+and each option, so you can see math render as you type. Existing questions can be edited too —
+click the pencil icon next to any question in the list below.
+
+**Bulk Upload** — pick a test, then either upload a `.csv` file or paste CSV text directly. Columns:
+`question, option1, option2, option3, option4, correct` (correct = option number, 1–4). Click the
+"CSV format / template" toggle on the page for a copyable example. Shows a preview of every parsed
+question before anything is saved.
+
+**AI Generate** — type a topic and a count, and it drafts multiple-choice questions for you to
+review, edit out any you don't like, and save. **This needs your own Anthropic API key**, separate
+from any Claude chat interface:
+1. Go to [console.anthropic.com](https://console.anthropic.com) → **API Keys** → create a key
+   (this requires setting up billing on your Anthropic account — usage is billed to you directly)
+2. Add it as `ANTHROPIC_API_KEY` in `.env.local` and in Vercel's Environment Variables
+3. Redeploy
+
+Without this key set, every other feature (Bulk Upload, Add Single, Edit, the rest of the site)
+still works fine — only the "AI Generate" tab needs it.
+
+**Math equations** — anywhere you type a question or option, wrap math in single `$` for inline
+(`$\frac{1}{2}$`) or double `$$` for a centered block equation. This renders using KaTeX, the same
+math typesetting engine used by many textbooks and course platforms. This works in Add Single, Bulk
+Upload, AI Generate, and the question list — but not yet on a public-facing test page, since that
+page doesn't exist yet (see Section 7's "What's still not built").
