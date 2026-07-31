@@ -227,12 +227,11 @@ safe to run the whole file again even though earlier parts already exist, thanks
 `drop ... if exists` guards throughout.
 
 ### What's still not built
-- **The actual test-taking experience for regular users** — right now the admin can create tests
-  and add questions, but there's no page where a logged-in user takes a test and gets a score.
-  This is the biggest remaining piece.
-- Editing an existing Category/Topic/Test (Questions can now be edited — see Section 8)
+- Editing an existing Category/Topic/Test (Questions can be edited — see Section 8)
 - Making the Premium price editable from the dashboard instead of in code
 - Search and notifications in the top bar are visual only — not wired to real data yet
+- A "My Results" page for students to see their own past attempts (the data exists in
+  `test_attempts` already — this just needs a page querying it by the logged-in user's email)
 
 
 ## 8. Question Bank: bulk upload, editing, AI generation, and math
@@ -262,5 +261,37 @@ still works fine — only the "AI Generate" tab needs it.
 **Math equations** — anywhere you type a question or option, wrap math in single `$` for inline
 (`$\frac{1}{2}$`) or double `$$` for a centered block equation. This renders using KaTeX, the same
 math typesetting engine used by many textbooks and course platforms. This works in Add Single, Bulk
-Upload, AI Generate, and the question list — but not yet on a public-facing test page, since that
-page doesn't exist yet (see Section 7's "What's still not built").
+Upload, AI Generate, and the question list — and now also on the student-facing test page (Section 9).
+
+
+## 9. Connected! Courses, Mock Tests, and the test-taking flow
+
+The Navbar's **Courses** and **Mock Tests** links now go to real pages instead of the homepage:
+
+- **`/courses`** — shows every Category and its Topics, exactly as created in `/admin/categories`
+  and `/admin/topics`
+- **`/tests`** — shows every Test, grouped by topic, with its price. Free tests (₹0) show a
+  "Start Test" button for any signed-in user; priced tests show "Unlock with Premium" and send
+  non-Premium users to the Pricing section instead
+- **`/tests/[id]`** — the actual test-taking page: renders each question (math included) with
+  radio-button options, lets the student answer at their own pace, then submits for scoring
+
+**How scoring stays secure:** the correct answer is never sent to the browser while the student is
+taking the test — only after they submit. Two API routes handle this:
+- `GET /api/tests/[id]/questions` returns only `question_text` and `options`, deliberately leaving
+  out `correct_option`
+- `POST /api/tests/[id]/submit` receives the student's answers, checks them against the real
+  answers server-side, saves the attempt to `test_attempts`, and only then returns which were right
+
+Both routes re-check access on every request (signed in, and either the test is free or the user's
+Premium subscription is active) — so a Free user can't reach a paid test's questions just by
+guessing the URL.
+
+The student Dashboard now links to both pages under "Browse Courses" / "Browse Mock Tests".
+
+### Still open
+- No "My Results" page yet for students (see the note in Section 7)
+- Only one question type (single-answer multiple choice) — no partial credit, negative marking, or
+  a timer yet
+- The 5-choice "Free vs Premium" rule is currently just "price is 0 or not" — no per-category or
+  time-limited free trial logic

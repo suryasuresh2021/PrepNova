@@ -42,9 +42,14 @@ export default async function DashboardPage() {
         )}
       </div>
 
-      <p className="font-body mt-8 text-sm text-slate-400">
-        Course content and mock tests will appear here once the Super Admin adds them.
-      </p>
+      <div className="mt-8 flex gap-4">
+        <Link href="/courses" className="font-body text-sm font-semibold text-slate-700 hover:text-slate-900">
+          Browse Courses →
+        </Link>
+        <Link href="/tests" className="font-body text-sm font-semibold text-slate-700 hover:text-slate-900">
+          Browse Mock Tests →
+        </Link>
+      </div>
     </main>
   );
 }
