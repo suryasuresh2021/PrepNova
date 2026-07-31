@@ -194,3 +194,42 @@ No new environment variables are needed for this — it reuses the same `NEXT_PU
   navbar shows Dashboard/Sign out once you're signed in.
 - Colors, fonts, and copy are easy to change in `tailwind.config.js` and the component files.
 - All images are hand-drawn SVG (no external image dependencies), so the site loads fast.
+
+
+## 7. Super Admin Dashboard
+
+`/admin` is now a full dashboard, not just a single test-creation form. New TypeScript files live
+alongside the existing JavaScript ones — Next.js supports both in the same project, so nothing
+needed to change in the pages built earlier.
+
+**Layout:** collapsible sidebar (desktop) / drawer (mobile), with active-page highlighting, plus a
+top bar with search, notifications, and a profile dropdown. All of `/admin/*` is protected both by
+`middleware.js` and by a layout-level check — a non-admin (or logged-out visitor) is bounced to
+`/admin/login` at the server level before any admin content ever renders.
+
+**Pages:**
+- **Dashboard** (`/admin`) — 8 live stat cards (Total Users, Premium Users, Categories, Topics,
+  Questions, Tests, Revenue, Tests Attempted Today), a Recent Users table, Recent Tests table,
+  Quick Actions, and a Recent Activity timeline — all pulling real numbers from Supabase, not
+  placeholder data.
+- **Categories** / **Topics** — full create/delete management, with Topics nested under a Category
+- **Tests** — the topic-wise test + pricing tool from before, now inside the new shell
+- **Question Bank** — add multiple-choice questions (4 options + correct answer) to a specific test
+- **Users** — read-only list of everyone who's signed up, with their Free/Premium status
+- **Results** — read-only list of test attempts (empty until the test-taking flow exists)
+- **Premium Plans** — shows current subscriber count and revenue; price itself is still set in code
+  (see the page for exactly where)
+- **Settings** — basic admin profile info for now
+
+**One more SQL step:** the dashboard's stats need a few more tables (`categories`, `topics`,
+`questions`, `test_attempts`, `payments`). Re-run `supabase/schema.sql` in the SQL Editor — it's
+safe to run the whole file again even though earlier parts already exist, thanks to the
+`drop ... if exists` guards throughout.
+
+### What's still not built
+- **The actual test-taking experience for regular users** — right now the admin can create tests
+  and add questions, but there's no page where a logged-in user takes a test and gets a score.
+  This is the biggest remaining piece.
+- Editing an existing Category/Topic/Test/Question (currently create + delete only, no update)
+- Making the Premium price editable from the dashboard instead of in code
+- Search and notifications in the top bar are visual only — not wired to real data yet

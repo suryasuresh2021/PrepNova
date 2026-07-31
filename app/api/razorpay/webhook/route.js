@@ -43,6 +43,16 @@ export async function POST(request) {
         console.error("Supabase upsert failed:", error);
         // Still return 200 so Razorpay doesn't endlessly retry — log this for manual follow-up.
       }
+
+      const { error: paymentLogError } = await supabaseAdmin.from("payments").insert({
+        email,
+        amount_inr: Math.round((payment.amount || 0) / 100),
+        razorpay_payment_id: payment.id,
+      });
+
+      if (paymentLogError) {
+        console.error("Payments ledger insert failed:", paymentLogError);
+      }
     } else {
       console.error("Razorpay webhook: no email found in payment notes");
     }

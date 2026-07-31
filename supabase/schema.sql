@@ -91,3 +91,100 @@ drop policy if exists "Tests are publicly readable" on tests;
 create policy "Tests are publicly readable"
   on tests for select
   using (true);
+
+
+-- ============================================================
+-- Categories — top-level groupings (e.g. "Quantitative Aptitude")
+-- ============================================================
+
+create table if not exists categories (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  description text,
+  created_at timestamptz not null default now()
+);
+
+alter table categories enable row level security;
+
+drop policy if exists "Categories are publicly readable" on categories;
+create policy "Categories are publicly readable"
+  on categories for select
+  using (true);
+
+
+-- ============================================================
+-- Topics — sit under a Category (e.g. "Time & Work" under "Quantitative Aptitude")
+-- ============================================================
+
+create table if not exists topics (
+  id uuid primary key default gen_random_uuid(),
+  category_id uuid references categories(id) on delete cascade,
+  name text not null,
+  created_at timestamptz not null default now()
+);
+
+alter table topics enable row level security;
+
+drop policy if exists "Topics are publicly readable" on topics;
+create policy "Topics are publicly readable"
+  on topics for select
+  using (true);
+
+
+-- ============================================================
+-- Questions — individual MCQs, optionally linked to a topic and/or test
+-- ============================================================
+
+create table if not exists questions (
+  id uuid primary key default gen_random_uuid(),
+  topic_id uuid references topics(id) on delete set null,
+  test_id uuid references tests(id) on delete set null,
+  question_text text not null,
+  options jsonb not null default '[]',
+  correct_option integer not null default 0,
+  created_at timestamptz not null default now()
+);
+
+alter table questions enable row level security;
+-- No public read policy yet — the question bank isn't exposed to users
+-- until the test-taking flow is built. Admin API routes use the service role.
+
+
+-- ============================================================
+-- Test attempts — one row per user completing a test
+-- (powers Results and "Tests Attempted Today")
+-- ============================================================
+
+create table if not exists test_attempts (
+  id uuid primary key default gen_random_uuid(),
+  test_id uuid references tests(id) on delete cascade,
+  email text not null,
+  score integer not null default 0,
+  total_questions integer not null default 0,
+  attempted_at timestamptz not null default now()
+);
+
+alter table test_attempts enable row level security;
+
+drop policy if exists "Users can view their own attempts" on test_attempts;
+create policy "Users can view their own attempts"
+  on test_attempts for select
+  using (auth.jwt() ->> 'email' = email);
+
+
+-- ============================================================
+-- Payments — a running ledger of every captured payment (powers Total Revenue)
+-- Written by the Razorpay webhook alongside the subscriptions upsert.
+-- ============================================================
+
+create table if not exists payments (
+  id uuid primary key default gen_random_uuid(),
+  email text not null,
+  amount_inr integer not null,
+  razorpay_payment_id text,
+  created_at timestamptz not null default now()
+);
+
+alter table payments enable row level security;
+-- No public policy — only the webhook (service role) writes here,
+-- and only admin API routes (service role) read the full ledger.
