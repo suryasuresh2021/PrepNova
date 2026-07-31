@@ -20,7 +20,7 @@ export default async function DashboardPage() {
   const isPremium = subscription?.status === "active" && subscription?.plan === "premium";
 
   return (
-    <main className="mx-auto min-h-screen max-w-3xl px-6 py-16">
+    <main className="mx-auto min-h-screen max-w-3xl bg-[#FAF9F6] px-6 py-16">
       <div className="flex items-center justify-between">
         <h1 className="font-display text-2xl font-semibold text-slate-900">Your Dashboard</h1>
         <SignOutButton />
