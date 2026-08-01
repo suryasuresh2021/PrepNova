@@ -311,17 +311,18 @@ column; AI-generated questions come with one automatically.
 
 **Topics now link to real Materials and Tests** — on `/courses`, each Topic under a Category shows
 the Materials and Tests that actually belong to it, with the same lock/unlock and Free/Premium
-logic used everywhere else on the site. Two different linking approaches were used, worth knowing:
-- **Materials → Topic**: a real link. When adding a Material, there's now an optional "Topic"
-  dropdown (filtered to the selected Category). Pick one and it'll show up under that Topic on
-  `/courses`.
-- **Tests → Topic**: matched **by name** (e.g. a Topic named "Time & Work" matches any Test whose
-  topic field is also "Time & Work", ignoring case/spacing). This was a deliberate choice — Tests
-  already use a free-typed topic field everywhere (Question Bank, Bulk Upload, AI Generate), and
-  turning that into a hard dropdown-only link would have meant reworking all three. The tradeoff:
-  **keep topic names spelled consistently** between `/admin/topics` and however you type a test's
-  topic, or the match won't find it. If a Test doesn't show up under a Topic, that's almost always
-  a spelling/capitalization mismatch to check first.
+logic used everywhere else on the site.
+- **Materials → Topic**: when adding a Material, there's an optional "Topic" dropdown (filtered to
+  the selected Category). Pick one and it shows up under that Topic on `/courses`.
+- **Tests → Topic**: when adding a Test in `/admin/tests`, there's now a **Topic dropdown** (pulled
+  from `/admin/topics`) as the primary way to set a test's topic — pick one and it's a real,
+  permanent link. A "type a custom topic instead" fallback is still there underneath, for a topic
+  that doesn't exist yet; tests created that way aren't linked to a Topic record and the admin
+  Tests list flags them as "not linked to a Topic" so they're easy to spot and fix later by editing
+  the test's topic via SQL or recreating it through the dropdown.
+- Existing tests created before this update (with only the old free-text topic, no `topic_id`)
+  still show up correctly — `/courses` falls back to matching by name for those, so nothing that
+  already worked stopped working.
 
 
 ## 11. Performance Analysis, Materials progress, and AdSense

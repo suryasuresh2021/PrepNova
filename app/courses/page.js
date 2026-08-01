@@ -59,7 +59,9 @@ export default async function CoursesPage() {
                   <div className="mt-4 space-y-4">
                     {cat.topics.map((topic) => {
                       const topicMaterials = (materials || []).filter((m) => m.topic_id === topic.id);
-                      const topicTests = (tests || []).filter((t) => norm(t.topic) === norm(topic.name));
+                      const topicTests = (tests || []).filter(
+                        (t) => t.topic_id === topic.id || (!t.topic_id && norm(t.topic) === norm(topic.name))
+                      );
 
                       return (
                         <div key={topic.id} className="rounded-2xl border border-slate-200 bg-white p-5">

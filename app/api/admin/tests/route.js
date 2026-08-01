@@ -16,7 +16,7 @@ export async function POST(request) {
   const admin = await requireAdmin();
   if (!admin) return NextResponse.json({ error: "Not authorized" }, { status: 403 });
 
-  const { topic, title, description, price_inr } = await request.json();
+  const { topic, topic_id, title, description, price_inr } = await request.json();
 
   if (!topic || !title) {
     return NextResponse.json({ error: "Topic and title are required" }, { status: 400 });
@@ -24,7 +24,7 @@ export async function POST(request) {
 
   const { data, error } = await supabaseAdmin
     .from("tests")
-    .insert({ topic, title, description: description || "", price_inr: Number(price_inr) || 0 })
+    .insert({ topic, topic_id: topic_id || null, title, description: description || "", price_inr: Number(price_inr) || 0 })
     .select()
     .single();
 

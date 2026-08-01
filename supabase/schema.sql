@@ -276,3 +276,12 @@ alter table questions add column if not exists explanation text;
 -- ============================================================
 
 alter table materials add column if not exists topic_id uuid references topics(id) on delete set null;
+
+
+-- ============================================================
+-- Real link from a Test to a Topic (in addition to the existing free-text
+-- topic column, which stays for backward compatibility with everywhere
+-- else in the app that already reads it as a plain string).
+-- ============================================================
+
+alter table tests add column if not exists topic_id uuid references topics(id) on delete set null;
