@@ -19,6 +19,7 @@ export async function POST(request) {
       question_text: q.question_text,
       options: q.options.filter(Boolean),
       correct_option: Number(q.correct_option) || 0,
+      explanation: q.explanation || null,
     }));
 
   if (rows.length === 0) {

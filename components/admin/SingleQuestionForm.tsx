@@ -11,6 +11,7 @@ export type QuestionFormValues = {
   question_text: string;
   options: string[];
   correct_option: number;
+  explanation?: string;
 };
 
 type SingleQuestionFormProps = {
@@ -25,6 +26,7 @@ const emptyValues: QuestionFormValues = {
   question_text: "",
   options: ["", "", "", ""],
   correct_option: 0,
+  explanation: "",
 };
 
 export default function SingleQuestionForm({ tests, initial, onSaved, onCancelEdit }: SingleQuestionFormProps) {
@@ -121,6 +123,22 @@ export default function SingleQuestionForm({ tests, initial, onSaved, onCancelEd
         <p className="font-body text-xs text-slate-400">
           Select the radio button next to the correct answer. Math works in options too.
         </p>
+      </div>
+
+      <div>
+        <textarea
+          placeholder="Explanation (optional) — shown to students after they submit the test"
+          value={values.explanation || ""}
+          onChange={(e) => setValues({ ...values, explanation: e.target.value })}
+          rows={2}
+          className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:border-teal-500 focus:outline-none"
+        />
+        {values.explanation && (
+          <p className="font-body mt-1.5 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-700">
+            <span className="mr-1 text-xs text-slate-400">Preview:</span>
+            <MathText text={values.explanation} />
+          </p>
+        )}
       </div>
 
       <div className="flex items-center gap-3">

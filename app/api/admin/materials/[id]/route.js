@@ -6,7 +6,7 @@ export async function PUT(request, { params }) {
   const admin = await requireAdmin();
   if (!admin) return NextResponse.json({ error: "Not authorized" }, { status: 403 });
 
-  const { category_id, title, description, material_type, url, content, is_premium } = await request.json();
+  const { category_id, topic_id, title, description, material_type, url, content, is_premium } = await request.json();
 
   if (!category_id || !title) {
     return NextResponse.json({ error: "Category and title are required" }, { status: 400 });
@@ -16,6 +16,7 @@ export async function PUT(request, { params }) {
     .from("materials")
     .update({
       category_id,
+      topic_id: topic_id || null,
       title,
       description: description || "",
       material_type: material_type || "link",
@@ -24,7 +25,7 @@ export async function PUT(request, { params }) {
       is_premium: Boolean(is_premium),
     })
     .eq("id", params.id)
-    .select("*, categories(name)")
+    .select("*, categories(name), topics(name)")
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

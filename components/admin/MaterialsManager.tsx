@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Trash2, Pencil, Plus, Loader2, X, Link2, FileText, Video, StickyNote } from "lucide-react";
+import { Trash2, Pencil, Plus, Loader2, X, Link2, FileText, Video, StickyNote, Upload, CheckCircle2 } from "lucide-react";
 
 type Category = { id: string; name: string };
+type Topic = { id: string; name: string; category_id: string };
 type Material = {
   id: string;
   category_id: string;
+  topic_id: string | null;
   title: string;
   description: string | null;
   material_type: "link" | "pdf" | "video" | "note";
@@ -14,10 +16,12 @@ type Material = {
   content: string | null;
   is_premium: boolean;
   categories: { name: string } | null;
+  topics: { name: string } | null;
 };
 
 const emptyForm = {
   category_id: "",
+  topic_id: "",
   title: "",
   description: "",
   material_type: "link" as Material["material_type"],
@@ -36,20 +40,25 @@ const typeIcons: Record<Material["material_type"], typeof Link2> = {
 export default function MaterialsManager() {
   const [materials, setMaterials] = useState<Material[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [topics, setTopics] = useState<Topic[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
-    const [materialsRes, categoriesRes] = await Promise.all([
+    const [materialsRes, categoriesRes, topicsRes] = await Promise.all([
       fetch("/api/admin/materials"),
       fetch("/api/admin/categories"),
+      fetch("/api/admin/topics"),
     ]);
     if (materialsRes.ok) setMaterials(await materialsRes.json());
     if (categoriesRes.ok) setCategories(await categoriesRes.json());
+    if (topicsRes.ok) setTopics(await topicsRes.json());
     setLoading(false);
   };
 
@@ -68,7 +77,7 @@ export default function MaterialsManager() {
     const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify({ ...form, topic_id: form.topic_id || null }),
     });
 
     if (res.ok) {
@@ -82,10 +91,32 @@ export default function MaterialsManager() {
     setSaving(false);
   };
 
+  const handlePdfUpload = async (file: File) => {
+    setUploading(true);
+    setUploadError(null);
+
+    const body = new FormData();
+    body.append("file", file);
+
+    try {
+      const res = await fetch("/api/admin/materials/upload", { method: "POST", body });
+      const data = await res.json();
+      if (res.ok) {
+        setForm((f) => ({ ...f, url: data.url }));
+      } else {
+        setUploadError(data.error || "Upload failed");
+      }
+    } catch {
+      setUploadError("Upload failed");
+    }
+    setUploading(false);
+  };
+
   const startEdit = (m: Material) => {
     setEditingId(m.id);
     setForm({
       category_id: m.category_id,
+      topic_id: m.topic_id || "",
       title: m.title,
       description: m.description || "",
       material_type: m.material_type,
@@ -117,6 +148,7 @@ export default function MaterialsManager() {
   }
 
   const needsUrl = form.material_type === "link" || form.material_type === "pdf" || form.material_type === "video";
+  const topicsForCategory = topics.filter((t) => t.category_id === form.category_id);
 
   return (
     <div className="space-y-6">
@@ -124,13 +156,27 @@ export default function MaterialsManager() {
         <select
           required
           value={form.category_id}
-          onChange={(e) => setForm({ ...form, category_id: e.target.value })}
+          onChange={(e) => setForm({ ...form, category_id: e.target.value, topic_id: "" })}
           className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:border-teal-500 focus:outline-none"
         >
           <option value="">Select a category…</option>
           {categories.map((c) => (
             <option key={c.id} value={c.id}>
               {c.name}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={form.topic_id}
+          onChange={(e) => setForm({ ...form, topic_id: e.target.value })}
+          disabled={!form.category_id}
+          className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:border-teal-500 focus:outline-none disabled:bg-slate-50 disabled:text-slate-400"
+        >
+          <option value="">No specific topic (category-wide)</option>
+          {topicsForCategory.map((t) => (
+            <option key={t.id} value={t.id}>
+              {t.name}
             </option>
           ))}
         </select>
@@ -151,7 +197,7 @@ export default function MaterialsManager() {
           placeholder="Title"
           value={form.title}
           onChange={(e) => setForm({ ...form, title: e.target.value })}
-          className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:border-teal-500 focus:outline-none sm:col-span-2"
+          className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:border-teal-500 focus:outline-none"
         />
 
         <input
@@ -160,6 +206,29 @@ export default function MaterialsManager() {
           onChange={(e) => setForm({ ...form, description: e.target.value })}
           className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:border-teal-500 focus:outline-none sm:col-span-2"
         />
+
+        {form.material_type === "pdf" && (
+          <div className="rounded-lg border-2 border-dashed border-slate-300 p-4 text-center sm:col-span-2">
+            <Upload size={18} className="mx-auto text-slate-400" aria-hidden="true" />
+            <label className="mt-1.5 block cursor-pointer font-body text-sm font-medium text-teal-700 hover:text-teal-800">
+              {uploading ? "Uploading…" : "Upload a PDF file"}
+              <input
+                type="file"
+                accept="application/pdf"
+                className="hidden"
+                disabled={uploading}
+                onChange={(e) => e.target.files?.[0] && handlePdfUpload(e.target.files[0])}
+              />
+            </label>
+            <p className="font-body mt-1 text-xs text-slate-400">Up to 15MB — or paste a URL below instead</p>
+            {form.url && (
+              <p className="font-body mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-teal-700">
+                <CheckCircle2 size={13} aria-hidden="true" /> File ready
+              </p>
+            )}
+            {uploadError && <p className="font-body mt-2 text-xs text-red-600">{uploadError}</p>}
+          </div>
+        )}
 
         {needsUrl ? (
           <input
@@ -228,7 +297,8 @@ export default function MaterialsManager() {
                     <div>
                       <p className="font-body text-sm font-semibold text-slate-900">{m.title}</p>
                       <p className="font-body text-xs text-slate-500">
-                        {m.categories?.name} ·{" "}
+                        {m.categories?.name}
+                        {m.topics?.name ? ` · ${m.topics.name}` : ""} ·{" "}
                         <span className={m.is_premium ? "text-amber-700" : "text-teal-700"}>
                           {m.is_premium ? "Premium" : "Free"}
                         </span>

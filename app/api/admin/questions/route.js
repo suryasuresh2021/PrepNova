@@ -19,7 +19,7 @@ export async function POST(request) {
   const admin = await requireAdmin();
   if (!admin) return NextResponse.json({ error: "Not authorized" }, { status: 403 });
 
-  const { test_id, question_text, options, correct_option } = await request.json();
+  const { test_id, question_text, options, correct_option, explanation } = await request.json();
 
   if (!test_id || !question_text || !Array.isArray(options) || options.filter(Boolean).length < 2) {
     return NextResponse.json(
@@ -35,6 +35,7 @@ export async function POST(request) {
       question_text,
       options: options.filter(Boolean),
       correct_option: Number(correct_option) || 0,
+      explanation: explanation || null,
     })
     .select("*, tests(title)")
     .single();

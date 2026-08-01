@@ -11,11 +11,12 @@ type ParsedRow = {
   question_text: string;
   options: string[];
   correct_option: number;
+  explanation: string;
 };
 
-const TEMPLATE = `question,option1,option2,option3,option4,correct
-"If 6 men can do a work in 12 days, how many days for 8 men?",6,7,8,9,4
-"What is $\\frac{1}{2} + \\frac{1}{3}$?",5/6,2/3,1,3/5,1`;
+const TEMPLATE = `question,option1,option2,option3,option4,correct,explanation
+"If 6 men can do a work in 12 days, how many days for 8 men?",6,7,8,9,4,"6x12=8x days, so days=9"
+"What is $\\frac{1}{2} + \\frac{1}{3}$?",5/6,2/3,1,3/5,1,"Common denominator 6: 3/6+2/6=5/6"`;
 
 export default function BulkQuestionUpload({ tests }: { tests: Test[] }) {
   const [testId, setTestId] = useState("");
@@ -42,7 +43,7 @@ export default function BulkQuestionUpload({ tests }: { tests: Test[] }) {
       const options = [row.option1, row.option2, row.option3, row.option4].map((o) => (o ?? "").trim());
       const correctRaw = Number(row.correct);
       if (!question_text || options.filter(Boolean).length < 2 || !correctRaw) continue;
-      rows.push({ question_text, options, correct_option: correctRaw - 1 });
+      rows.push({ question_text, options, correct_option: correctRaw - 1, explanation: (row.explanation ?? "").trim() });
     }
 
     if (rows.length === 0) {
@@ -133,8 +134,9 @@ export default function BulkQuestionUpload({ tests }: { tests: Test[] }) {
         <summary className="cursor-pointer font-medium text-slate-600">CSV format / template</summary>
         <pre className="mt-2 overflow-x-auto rounded-lg bg-slate-50 p-3">{TEMPLATE}</pre>
         <p className="mt-2">
-          Columns: <code>question, option1, option2, option3, option4, correct</code> — <code>correct</code> is
-          the option number (1–4). Math works with <code>$...$</code>.
+          Columns: <code>question, option1, option2, option3, option4, correct, explanation</code> —{" "}
+          <code>correct</code> is the option number (1–4), <code>explanation</code> is optional. Math
+          works with <code>$...$</code>.
         </p>
       </details>
 

@@ -19,7 +19,7 @@ export async function POST(request, { params }) {
   // the client never receives correct answers until this response.
   const { data: questions, error } = await supabaseAdmin
     .from("questions")
-    .select("id, question_text, options, correct_option")
+    .select("id, question_text, options, correct_option, explanation")
     .eq("test_id", params.id)
     .order("created_at", { ascending: true });
 
@@ -35,6 +35,7 @@ export async function POST(request, { params }) {
       question_text: q.question_text,
       options: q.options,
       correct_option: q.correct_option,
+      explanation: q.explanation,
       selected,
       isCorrect,
     };

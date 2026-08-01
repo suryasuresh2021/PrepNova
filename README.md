@@ -295,6 +295,35 @@ The student Dashboard now links to both pages under "Browse Courses" / "Browse M
 - The "Free vs Premium" rule is a simple flag per item — no per-category or time-limited free trial
 
 
+## 12. PDF upload, question explanations, and Topic → Materials/Tests linking
+
+**PDF upload for Materials** — when adding a Material and choosing type **PDF**, there's now an
+actual "Upload a PDF file" button (up to 15MB), not just a link field. It uploads to a Supabase
+Storage bucket called `materials`, which **creates itself automatically** the first time you upload
+— no manual bucket setup needed. The URL field is still there too, so you can paste an external PDF
+link instead if you'd rather not host the file yourself.
+
+**Explanations in the Question Bank** — every question (Add Single, Bulk Upload, and AI Generate)
+now has an optional Explanation field, with the same live math preview as the question text. This
+is shown to students on their results/review screen after they submit — never before, so it can't
+be used to guess the answer early. The Bulk Upload CSV template has a new optional `explanation`
+column; AI-generated questions come with one automatically.
+
+**Topics now link to real Materials and Tests** — on `/courses`, each Topic under a Category shows
+the Materials and Tests that actually belong to it, with the same lock/unlock and Free/Premium
+logic used everywhere else on the site. Two different linking approaches were used, worth knowing:
+- **Materials → Topic**: a real link. When adding a Material, there's now an optional "Topic"
+  dropdown (filtered to the selected Category). Pick one and it'll show up under that Topic on
+  `/courses`.
+- **Tests → Topic**: matched **by name** (e.g. a Topic named "Time & Work" matches any Test whose
+  topic field is also "Time & Work", ignoring case/spacing). This was a deliberate choice — Tests
+  already use a free-typed topic field everywhere (Question Bank, Bulk Upload, AI Generate), and
+  turning that into a hard dropdown-only link would have meant reworking all three. The tradeoff:
+  **keep topic names spelled consistently** between `/admin/topics` and however you type a test's
+  topic, or the match won't find it. If a Test doesn't show up under a Topic, that's almost always
+  a spelling/capitalization mismatch to check first.
+
+
 ## 11. Performance Analysis, Materials progress, and AdSense
 
 **Performance Analysis** — `/results` (now titled "Performance Analysis" on the page itself) got

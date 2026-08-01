@@ -261,3 +261,18 @@ create policy "Users can view their own material progress"
   using (auth.jwt() ->> 'email' = email);
 -- Writes happen only through the API route (service role), which verifies the
 -- logged-in user's own email server-side before inserting/deleting.
+
+
+-- ============================================================
+-- Question explanations (why the correct answer is correct)
+-- ============================================================
+
+alter table questions add column if not exists explanation text;
+
+
+-- ============================================================
+-- Optional link from a Material to a specific Topic (in addition to its Category)
+-- Nullable — existing materials with no topic keep working exactly as before.
+-- ============================================================
+
+alter table materials add column if not exists topic_id uuid references topics(id) on delete set null;

@@ -142,6 +142,14 @@ export default function TestRunner({ testId, title }) {
                   </p>
                 )}
               </div>
+              {r.explanation && (
+                <div className="mt-3 rounded-lg bg-slate-50 p-3">
+                  <p className="font-body text-xs font-semibold text-slate-500">Explanation</p>
+                  <p className="font-body mt-1 text-sm text-slate-700">
+                    <MathText text={r.explanation} />
+                  </p>
+                </div>
+              )}
             </li>
           ))}
         </ul>

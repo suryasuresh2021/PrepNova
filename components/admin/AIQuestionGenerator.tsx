@@ -9,6 +9,7 @@ type GeneratedQuestion = {
   question_text: string;
   options: string[];
   correct_option: number;
+  explanation?: string;
 };
 
 export default function AIQuestionGenerator({ tests }: { tests: Test[] }) {
@@ -119,6 +120,11 @@ export default function AIQuestionGenerator({ tests }: { tests: Test[] }) {
                   <p className="mt-1 text-xs text-teal-700">
                     Correct: <MathText text={q.options[q.correct_option]} />
                   </p>
+                  {q.explanation && (
+                    <p className="mt-1 text-xs text-slate-500">
+                      <MathText text={q.explanation} />
+                    </p>
+                  )}
                 </div>
                 <button
                   onClick={() => removeQuestion(i)}

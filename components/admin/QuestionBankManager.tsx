@@ -14,6 +14,7 @@ type Question = {
   question_text: string;
   options: string[];
   correct_option: number;
+  explanation: string | null;
   tests: { title: string } | null;
 };
 
@@ -54,6 +55,7 @@ export default function QuestionBankManager() {
       question_text: q.question_text,
       options: [...q.options, "", "", "", ""].slice(0, 4),
       correct_option: q.correct_option,
+      explanation: q.explanation || "",
     });
     setTab("single");
   };
