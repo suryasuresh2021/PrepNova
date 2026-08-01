@@ -67,10 +67,19 @@ export default function TestRunner({ testId, title }) {
         <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-6 text-center">
           <p className="text-4xl" aria-hidden="true">{emoji}</p>
           <p className="font-display mt-2 text-xl font-semibold text-slate-900">{message}</p>
-          <p className="font-body mt-1 text-3xl font-bold text-teal-700">{percent}%</p>
-          <p className="font-body text-sm text-slate-500">
-            {result.score} / {result.total} correct
-          </p>
+
+          <div className="mx-auto mt-5 grid max-w-xs grid-cols-2 gap-4">
+            <div className="rounded-xl bg-slate-50 p-4">
+              <p className="font-body text-xs uppercase tracking-wide text-slate-500">Marks</p>
+              <p className="font-display mt-1 text-2xl font-bold text-slate-900">
+                {result.score}/{result.total}
+              </p>
+            </div>
+            <div className="rounded-xl bg-slate-50 p-4">
+              <p className="font-body text-xs uppercase tracking-wide text-slate-500">Percentage</p>
+              <p className="font-display mt-1 text-2xl font-bold text-teal-700">{percent}%</p>
+            </div>
+          </div>
 
           <div className="mx-auto mt-4 h-2.5 w-full max-w-sm overflow-hidden rounded-full bg-slate-100">
             <div className="h-full bg-teal-600" style={{ width: `${percent}%` }} />

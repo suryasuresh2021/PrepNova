@@ -163,16 +163,14 @@ export default function MaterialsManager() {
 
         {needsUrl ? (
           <input
-            required
-            placeholder="URL (https://...)"
+            placeholder="URL (https://...) — optional, can be added later"
             value={form.url}
             onChange={(e) => setForm({ ...form, url: e.target.value })}
             className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:border-teal-500 focus:outline-none sm:col-span-2"
           />
         ) : (
           <textarea
-            required
-            placeholder="Note content"
+            placeholder="Note content (optional, can be added later)"
             value={form.content}
             onChange={(e) => setForm({ ...form, content: e.target.value })}
             rows={3}

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, Target, Award } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
@@ -19,13 +19,15 @@ export default async function MyResultsPage() {
     .order("attempted_at", { ascending: false });
 
   const list = attempts || [];
-  const averagePercent =
-    list.length > 0
-      ? Math.round(
-          (list.reduce((sum, a) => sum + (a.total_questions > 0 ? a.score / a.total_questions : 0), 0) / list.length) *
-            100
-        )
-      : 0;
+  const percentages = list.map((a) => (a.total_questions > 0 ? (a.score / a.total_questions) * 100 : 0));
+  const averagePercent = percentages.length > 0 ? Math.round(percentages.reduce((s, p) => s + p, 0) / percentages.length) : 0;
+  const bestPercent = percentages.length > 0 ? Math.round(Math.max(...percentages)) : 0;
+
+  const stats = [
+    { label: "Tests Attempted", value: list.length.toString(), icon: Target },
+    { label: "Average Score", value: `${averagePercent}%`, icon: TrendingUp },
+    { label: "Best Score", value: `${bestPercent}%`, icon: Award },
+  ];
 
   return (
     <>
@@ -40,17 +42,22 @@ export default async function MyResultsPage() {
           </p>
         ) : (
           <>
-            <div className="mt-6 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-5">
-              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-900 text-amber-400">
-                <TrendingUp size={18} aria-hidden="true" />
-              </span>
-              <div>
-                <p className="font-body text-xs text-slate-500">Average score across {list.length} attempt{list.length !== 1 ? "s" : ""}</p>
-                <p className="font-display text-lg font-semibold text-slate-900">{averagePercent}%</p>
-              </div>
+            <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+              {stats.map(({ label, value, icon: Icon }) => (
+                <div key={label} className="rounded-2xl border border-slate-200 bg-white p-5">
+                  <div className="flex items-center justify-between">
+                    <p className="font-body text-xs font-medium uppercase tracking-wide text-slate-500">{label}</p>
+                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-900 text-amber-400">
+                      <Icon size={16} aria-hidden="true" />
+                    </span>
+                  </div>
+                  <p className="font-display mt-2 text-2xl font-semibold text-slate-900">{value}</p>
+                </div>
+              ))}
             </div>
 
-            <ul className="mt-6 divide-y divide-slate-100 rounded-2xl border border-slate-200 bg-white">
+            <h2 className="font-display mt-8 text-lg font-semibold text-slate-900">Attempt History</h2>
+            <ul className="mt-3 divide-y divide-slate-100 rounded-2xl border border-slate-200 bg-white">
               {list.map((a) => {
                 const percent = a.total_questions > 0 ? Math.round((a.score / a.total_questions) * 100) : 0;
                 return (
@@ -62,11 +69,13 @@ export default async function MyResultsPage() {
                       </p>
                     </div>
                     <div className="flex-shrink-0 text-right">
+                      <p className="font-body text-xs text-slate-400">Marks</p>
                       <p className="font-display text-sm font-semibold text-slate-900">
                         {a.score}/{a.total_questions}
                       </p>
+                      <p className="font-body mt-1 text-xs text-slate-400">Percentage</p>
                       <p
-                        className={`font-body text-xs font-semibold ${
+                        className={`font-display text-sm font-semibold ${
                           percent >= 80 ? "text-teal-700" : percent >= 50 ? "text-amber-700" : "text-red-600"
                         }`}
                       >

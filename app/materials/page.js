@@ -76,13 +76,17 @@ export default async function MaterialsPage() {
                               <Lock size={14} aria-hidden="true" /> Unlock with Premium
                             </p>
                           ) : m.material_type === "note" ? (
-                            <details className="mt-4">
-                              <summary className="cursor-pointer font-body text-sm font-semibold text-teal-700 hover:text-teal-800">
-                                Read note
-                              </summary>
-                              <p className="font-body mt-2 whitespace-pre-wrap text-sm text-slate-700">{m.content}</p>
-                            </details>
-                          ) : (
+                            m.content ? (
+                              <details className="mt-4">
+                                <summary className="cursor-pointer font-body text-sm font-semibold text-teal-700 hover:text-teal-800">
+                                  Read note
+                                </summary>
+                                <p className="font-body mt-2 whitespace-pre-wrap text-sm text-slate-700">{m.content}</p>
+                              </details>
+                            ) : (
+                              <p className="font-body mt-4 text-sm text-slate-400">Content coming soon</p>
+                            )
+                          ) : m.url ? (
                             <a
                               href={m.url}
                               target="_blank"
@@ -91,6 +95,8 @@ export default async function MaterialsPage() {
                             >
                               Open <ExternalLink size={14} aria-hidden="true" />
                             </a>
+                          ) : (
+                            <p className="font-body mt-4 text-sm text-slate-400">Link coming soon</p>
                           )}
                         </div>
                       );
