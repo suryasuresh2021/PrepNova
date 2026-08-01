@@ -64,6 +64,9 @@ const Navbar = () => {
               <Link href="/dashboard" className="font-body text-sm font-semibold text-slate-700 hover:text-slate-900">
                 Dashboard
               </Link>
+              <Link href="/results" className="font-body text-sm font-semibold text-slate-700 hover:text-slate-900">
+                Performance
+              </Link>
               <SignOutButton />
             </>
           ) : (
@@ -109,6 +112,9 @@ const Navbar = () => {
                   <>
                     <Link href="/dashboard" className="flex-1">
                       <SecondaryButton className="w-full px-4 py-2.5">Dashboard</SecondaryButton>
+                    </Link>
+                    <Link href="/results" className="flex-1">
+                      <SecondaryButton className="w-full px-4 py-2.5">Performance</SecondaryButton>
                     </Link>
                     <SignOutButton className="flex-1 justify-center px-4 py-2.5" />
                   </>

@@ -29,11 +29,30 @@ export default async function MyResultsPage() {
     { label: "Best Score", value: `${bestPercent}%`, icon: Award },
   ];
 
+  // Topic-wise breakdown
+  const byTopic = {};
+  list.forEach((a) => {
+    const topic = a.tests?.topic || "Uncategorized";
+    if (!byTopic[topic]) byTopic[topic] = { correct: 0, total: 0, attempts: 0 };
+    byTopic[topic].correct += a.score;
+    byTopic[topic].total += a.total_questions;
+    byTopic[topic].attempts += 1;
+  });
+  const topicBreakdown = Object.entries(byTopic)
+    .map(([topic, d]) => ({ topic, percent: d.total > 0 ? Math.round((d.correct / d.total) * 100) : 0, attempts: d.attempts }))
+    .sort((a, b) => b.attempts - a.attempts);
+
+  // Score trend — oldest to newest, last 10 attempts
+  const trend = [...list].reverse().slice(-10).map((a) => ({
+    percent: a.total_questions > 0 ? Math.round((a.score / a.total_questions) * 100) : 0,
+    title: a.tests?.title,
+  }));
+
   return (
     <>
       <Navbar />
       <main className="mx-auto min-h-screen max-w-3xl bg-[#FAF9F6] px-6 py-16">
-        <h1 className="font-display text-2xl font-semibold text-slate-900">My Results</h1>
+        <h1 className="font-display text-2xl font-semibold text-slate-900">Performance Analysis</h1>
         <p className="font-body mt-1 text-sm text-slate-600">Signed in as {user.email}</p>
 
         {list.length === 0 ? (
@@ -55,6 +74,52 @@ export default async function MyResultsPage() {
                 </div>
               ))}
             </div>
+
+            {trend.length > 1 && (
+              <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-5">
+                <h2 className="font-display text-base font-semibold text-slate-900">Score Trend</h2>
+                <p className="font-body text-xs text-slate-500">Last {trend.length} attempts, oldest to newest</p>
+                <div className="mt-4 flex h-32 items-end gap-2">
+                  {trend.map((t, i) => (
+                    <div key={i} className="flex flex-1 flex-col items-center gap-1" title={`${t.title}: ${t.percent}%`}>
+                      <div className="flex h-24 w-full items-end overflow-hidden rounded-t-md bg-slate-100">
+                        <div
+                          className={`w-full rounded-t-md ${
+                            t.percent >= 80 ? "bg-teal-600" : t.percent >= 50 ? "bg-amber-500" : "bg-red-400"
+                          }`}
+                          style={{ height: `${t.percent}%` }}
+                        />
+                      </div>
+                      <span className="font-body text-[10px] text-slate-400">{t.percent}%</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {topicBreakdown.length > 0 && (
+              <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-5">
+                <h2 className="font-display text-base font-semibold text-slate-900">Topic-wise Breakdown</h2>
+                <div className="mt-4 space-y-4">
+                  {topicBreakdown.map((t) => (
+                    <div key={t.topic}>
+                      <div className="flex items-center justify-between">
+                        <p className="font-body text-sm text-slate-700">{t.topic}</p>
+                        <p className="font-body text-sm font-semibold text-slate-900">{t.percent}%</p>
+                      </div>
+                      <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                        <div
+                          className={`h-full ${
+                            t.percent >= 80 ? "bg-teal-600" : t.percent >= 50 ? "bg-amber-500" : "bg-red-400"
+                          }`}
+                          style={{ width: `${t.percent}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <h2 className="font-display mt-8 text-lg font-semibold text-slate-900">Attempt History</h2>
             <ul className="mt-3 divide-y divide-slate-100 rounded-2xl border border-slate-200 bg-white">

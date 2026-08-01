@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Lock, ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import AdUnit from "@/components/AdUnit";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getAccessContext, canAccessTest } from "@/lib/testAccess";
 
@@ -74,6 +75,9 @@ export default async function MockTestsPage() {
           </div>
         )}
       </main>
+      <div className="mx-auto max-w-5xl px-6">
+        <AdUnit slot="0000000002" />
+      </div>
       <Footer />
     </>
   );

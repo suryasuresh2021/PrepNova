@@ -216,3 +216,48 @@ alter table materials enable row level security;
 -- ============================================================
 
 alter table test_attempts add column if not exists time_taken_seconds integer;
+
+
+-- ============================================================
+-- Material progress — tracks which materials a student has marked as read
+-- ============================================================
+
+create table if not exists material_progress (
+  id uuid primary key default gen_random_uuid(),
+  email text not null,
+  material_id uuid references materials(id) on delete cascade,
+  viewed_at timestamptz not null default now(),
+  unique (email, material_id)
+);
+
+alter table material_progress enable row level security;
+
+drop policy if exists "Users can view their own material progress" on material_progress;
+create policy "Users can view their own material progress"
+  on material_progress for select
+  using (auth.jwt() ->> 'email' = email);
+
+-- No public insert/update/delete policy — writes go through the API route
+-- (using the service role), which always writes under the logged-in user's own email.
+
+
+-- ============================================================
+-- Material progress — tracks which materials a user has marked as read
+-- ============================================================
+
+create table if not exists material_progress (
+  id uuid primary key default gen_random_uuid(),
+  email text not null,
+  material_id uuid references materials(id) on delete cascade,
+  completed_at timestamptz not null default now(),
+  unique (email, material_id)
+);
+
+alter table material_progress enable row level security;
+
+drop policy if exists "Users can view their own material progress" on material_progress;
+create policy "Users can view their own material progress"
+  on material_progress for select
+  using (auth.jwt() ->> 'email' = email);
+-- Writes happen only through the API route (service role), which verifies the
+-- logged-in user's own email server-side before inserting/deleting.

@@ -295,6 +295,42 @@ The student Dashboard now links to both pages under "Browse Courses" / "Browse M
 - The "Free vs Premium" rule is a simple flag per item — no per-category or time-limited free trial
 
 
+## 11. Performance Analysis, Materials progress, and AdSense
+
+**Performance Analysis** — `/results` (now titled "Performance Analysis" on the page itself) got
+a real upgrade: a **Score Trend** bar chart of the last 10 attempts, and a **Topic-wise Breakdown**
+showing average score per topic. There's also now a **"Performance"** link in the navbar itself
+(next to Dashboard, visible once signed in) — no need to dig for it. The Dashboard's own summary
+card links straight through to this page too.
+
+**Materials reading progress** — every accessible material on `/materials` now has a "Mark as read"
+toggle. Each Category shows "X of Y read" with a small progress bar, computed only from materials
+the student can actually access (locked Premium items don't count against them). This is stored per
+user in a new `material_progress` table — re-run `supabase/schema.sql` to pick it up (safe to run
+the whole file again, as always).
+
+**Google AdSense** — wired up and inactive by default. Three placements: one on the homepage
+(between Testimonials and FAQ), one on Mock Tests, one on Materials — all just below the main
+content, not interrupting anything.
+
+To activate it:
+1. Apply at [adsense.google.com](https://adsense.google.com) — **this requires your site to
+   already be live with real content**; Google reviews the actual deployed site before approving,
+   so this is a step for after you've got courses/materials/tests actually populated, not before
+2. Once approved, copy your Publisher ID (format `ca-pub-XXXXXXXXXXXXXXXX`)
+3. Add it as `NEXT_PUBLIC_ADSENSE_CLIENT_ID` in `.env.local` and in Vercel
+4. Edit `public/ads.txt` — replace `pub-0000000000000000` with your real ID (Google checks this
+   file to confirm you own the site)
+5. Redeploy
+
+Until you complete this, the ad code doesn't load at all — verified by testing a build with the
+variable unset. Nothing about the site changes or breaks either way.
+
+The `slot` values in each `<AdUnit>` (in `app/page.js`, `app/tests/page.js`, `app/materials/page.js`)
+are placeholders — once you've created actual ad units in your AdSense dashboard, swap in the real
+slot IDs from there.
+
+
 ## 10. Materials, feedback messages, and result analysis
 
 **Materials** (`/admin/materials` for the admin, `/materials` for students) — a new content type
