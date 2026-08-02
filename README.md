@@ -295,6 +295,28 @@ The student Dashboard now links to both pages under "Browse Courses" / "Browse M
 - The "Free vs Premium" rule is a simple flag per item — no per-category or time-limited free trial
 
 
+## 13. Search everywhere, and Test editing
+
+**Search** — added in three places, all instant (filters what's already loaded, no extra network
+requests as you type):
+- `/admin/question-bank` — searches question text, options, and the test it belongs to
+- `/admin/tests` — searches test title, topic, and description
+- `/tests` (student side) — searches by title, topic, or description
+- `/materials` (student side) — searches by title or description
+
+**Test editing** — `/admin/tests` had Add and Delete before, but no way to fix a typo or change a
+price without deleting and recreating. There's now a pencil icon next to each test, same edit
+pattern as Categories/Topics/Questions.
+
+**Small internal change worth knowing about:** the Free/Premium access-check functions
+(`canAccessTest`, `canAccessMaterial`) used to live in a file that also imported server-only code,
+which meant they could only be used in Server Components. They've been split into
+`lib/accessRules.js` (pure functions, no imports) so the new search components — which need to be
+Client Components to handle typing — can use the exact same access logic instead of duplicating it.
+`lib/testAccess.js` still re-exports them, so nothing that already imported from there needed to
+change.
+
+
 ## 12. PDF upload, question explanations, and Topic → Materials/Tests linking
 
 **PDF upload for Materials** — when adding a Material and choosing type **PDF**, there's now an

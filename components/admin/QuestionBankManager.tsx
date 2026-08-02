@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Trash2, Pencil } from "lucide-react";
+import { Trash2, Pencil, Search } from "lucide-react";
 import SingleQuestionForm, { type QuestionFormValues } from "./SingleQuestionForm";
 import BulkQuestionUpload from "./BulkQuestionUpload";
 import AIQuestionGenerator from "./AIQuestionGenerator";
@@ -25,6 +25,7 @@ export default function QuestionBankManager() {
   const [tests, setTests] = useState<Test[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>("single");
+  const [searchQuery, setSearchQuery] = useState("");
   const [editing, setEditing] = useState<(QuestionFormValues & { id: string }) | null>(null);
 
   const load = async () => {
@@ -79,6 +80,16 @@ export default function QuestionBankManager() {
     { key: "ai", label: "AI Generate" },
   ];
 
+  const filteredQuestions = questions.filter((q) => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return true;
+    return (
+      q.question_text.toLowerCase().includes(query) ||
+      (q.tests?.title || "").toLowerCase().includes(query) ||
+      q.options.some((opt) => opt.toLowerCase().includes(query))
+    );
+  });
+
   return (
     <div className="space-y-6">
       <div className="flex gap-1 rounded-lg bg-slate-100 p-1 sm:w-fit">
@@ -107,14 +118,28 @@ export default function QuestionBankManager() {
       {tab === "ai" && <AIQuestionGenerator tests={tests} />}
 
       <div className="rounded-2xl border border-slate-200 bg-white p-6">
-        <h2 className="font-display text-base font-semibold text-slate-900">All Questions</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-display text-base font-semibold text-slate-900">All Questions</h2>
+          <div className="relative">
+            <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+            <input
+              type="search"
+              placeholder="Search questions…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-56 rounded-lg border border-slate-300 py-2 pl-9 pr-3 text-sm focus:border-teal-500 focus:outline-none"
+            />
+          </div>
+        </div>
         {loading ? (
           <p className="font-body mt-3 text-sm text-slate-500">Loading…</p>
         ) : questions.length === 0 ? (
           <p className="font-body mt-3 text-sm text-slate-500">No questions yet.</p>
+        ) : filteredQuestions.length === 0 ? (
+          <p className="font-body mt-3 text-sm text-slate-500">No questions match "{searchQuery}".</p>
         ) : (
           <ul className="mt-4 divide-y divide-slate-100">
-            {questions.map((q) => (
+            {filteredQuestions.map((q) => (
               <li key={q.id} className="flex items-start justify-between gap-4 py-3">
                 <div>
                   <p className="font-body text-xs font-medium text-teal-700">{q.tests?.title}</p>

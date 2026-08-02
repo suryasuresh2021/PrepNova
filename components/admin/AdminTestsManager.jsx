@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Trash2, Plus, Loader2 } from "lucide-react";
+import { Trash2, Pencil, Plus, Save, X, Loader2, Search } from "lucide-react";
 
 const emptyForm = { topic_id: "", topic: "", title: "", description: "", price_inr: 0 };
 
@@ -12,6 +12,8 @@ export default function AdminTestsManager() {
   const [saving, setSaving] = useState(false);
   const [useCustomTopic, setUseCustomTopic] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [editingId, setEditingId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState(null);
 
   const loadAll = async () => {
@@ -38,15 +40,19 @@ export default function AdminTestsManager() {
     setError(null);
 
     const payload = useCustomTopic ? { ...form, topic_id: null } : form;
+    const url = editingId ? `/api/admin/tests/${editingId}` : "/api/admin/tests";
+    const method = editingId ? "PUT" : "POST";
 
-    const res = await fetch("/api/admin/tests", {
-      method: "POST",
+    const res = await fetch(url, {
+      method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
 
     if (res.ok) {
       setForm(emptyForm);
+      setEditingId(null);
+      setUseCustomTopic(false);
       await loadAll();
     } else {
       const data = await res.json();
@@ -55,10 +61,41 @@ export default function AdminTestsManager() {
     setSaving(false);
   };
 
+  const startEdit = (t) => {
+    setEditingId(t.id);
+    setForm({
+      topic_id: t.topic_id || "",
+      topic: t.topic,
+      title: t.title,
+      description: t.description || "",
+      price_inr: t.price_inr,
+    });
+    setUseCustomTopic(!t.topic_id);
+    setError(null);
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setForm(emptyForm);
+    setUseCustomTopic(false);
+    setError(null);
+  };
+
   const handleDelete = async (id) => {
     await fetch(`/api/admin/tests/${id}`, { method: "DELETE" });
+    if (editingId === id) cancelEdit();
     await loadAll();
   };
+
+  const filteredTests = tests.filter((t) => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return true;
+    return (
+      t.title.toLowerCase().includes(query) ||
+      t.topic.toLowerCase().includes(query) ||
+      (t.description || "").toLowerCase().includes(query)
+    );
+  });
 
   return (
     <div className="mt-8">
@@ -133,28 +170,60 @@ export default function AdminTestsManager() {
           onChange={(e) => setForm({ ...form, description: e.target.value })}
           className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:border-teal-500 focus:outline-none sm:col-span-2"
         />
-        <button
-          type="submit"
-          disabled={saving}
-          className="font-body inline-flex w-fit items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-60"
-        >
-          {saving ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Plus size={16} aria-hidden="true" />}
-          Add Test
-        </button>
+
+        <div className="flex items-center gap-3 sm:col-span-2">
+          <button
+            type="submit"
+            disabled={saving}
+            className="font-body inline-flex w-fit items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-60"
+          >
+            {saving ? (
+              <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+            ) : editingId ? (
+              <Save size={16} aria-hidden="true" />
+            ) : (
+              <Plus size={16} aria-hidden="true" />
+            )}
+            {editingId ? "Save Changes" : "Add Test"}
+          </button>
+          {editingId && (
+            <button
+              type="button"
+              onClick={cancelEdit}
+              className="font-body inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-700"
+            >
+              <X size={16} aria-hidden="true" /> Cancel
+            </button>
+          )}
+        </div>
 
         {error && <p className="font-body text-sm text-red-600 sm:col-span-2">{error}</p>}
       </form>
 
       <div className="mt-8">
-        <h2 className="font-display text-lg font-semibold text-slate-900">Existing tests</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-display text-lg font-semibold text-slate-900">Existing tests</h2>
+          <div className="relative">
+            <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+            <input
+              type="search"
+              placeholder="Search tests…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-56 rounded-lg border border-slate-300 py-2 pl-9 pr-3 text-sm focus:border-teal-500 focus:outline-none"
+            />
+          </div>
+        </div>
 
         {loading ? (
           <p className="font-body mt-3 text-sm text-slate-500">Loading…</p>
         ) : tests.length === 0 ? (
           <p className="font-body mt-3 text-sm text-slate-500">No tests yet — add your first one above.</p>
+        ) : filteredTests.length === 0 ? (
+          <p className="font-body mt-3 text-sm text-slate-500">No tests match "{searchQuery}".</p>
         ) : (
           <ul className="mt-4 divide-y divide-slate-200 rounded-2xl border border-slate-200">
-            {tests.map((t) => (
+            {filteredTests.map((t) => (
               <li key={t.id} className="flex items-center justify-between gap-4 p-4">
                 <div>
                   <p className="font-body text-sm font-semibold text-slate-900">{t.title}</p>
@@ -163,13 +232,22 @@ export default function AdminTestsManager() {
                     {!t.topic_id && " · not linked to a Topic"}
                   </p>
                 </div>
-                <button
-                  onClick={() => handleDelete(t.id)}
-                  aria-label={`Delete ${t.title}`}
-                  className="flex-shrink-0 text-slate-400 transition hover:text-red-600"
-                >
-                  <Trash2 size={18} aria-hidden="true" />
-                </button>
+                <div className="flex flex-shrink-0 items-center gap-3">
+                  <button
+                    onClick={() => startEdit(t)}
+                    aria-label={`Edit ${t.title}`}
+                    className="text-slate-400 transition hover:text-teal-600"
+                  >
+                    <Pencil size={18} aria-hidden="true" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(t.id)}
+                    aria-label={`Delete ${t.title}`}
+                    className="text-slate-400 transition hover:text-red-600"
+                  >
+                    <Trash2 size={18} aria-hidden="true" />
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
