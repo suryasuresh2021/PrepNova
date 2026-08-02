@@ -228,7 +228,10 @@ export default function AdminTestsManager() {
                 <div>
                   <p className="font-body text-sm font-semibold text-slate-900">{t.title}</p>
                   <p className="font-body text-xs text-slate-500">
-                    {t.topic} · {t.price_inr === 0 ? "Free" : `₹${t.price_inr}`}
+                    {t.topic} · {t.price_inr === 0 ? "Free" : `₹${t.price_inr}`} ·{" "}
+                    <span className={t.questions_count > 0 ? "text-teal-700 font-medium" : "text-amber-600"}>
+                      {t.questions_count ?? 0} question{t.questions_count === 1 ? "" : "s"}
+                    </span>
                     {!t.topic_id && " · not linked to a Topic"}
                   </p>
                 </div>

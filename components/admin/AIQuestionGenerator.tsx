@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Sparkles, Loader2, Trash2, Check } from "lucide-react";
 import MathText from "./MathText";
 
-type Test = { id: string; title: string };
+type Test = { id: string; title: string; questions_count?: number };
 type GeneratedQuestion = {
   question_text: string;
   options: string[];
@@ -147,7 +147,7 @@ export default function AIQuestionGenerator({ tests }: { tests: Test[] }) {
               <option value="">Save to which test?</option>
               {tests.map((t) => (
                 <option key={t.id} value={t.id}>
-                  {t.title}
+                  {t.title} — {t.questions_count ?? 0} question{t.questions_count === 1 ? "" : "s"}
                 </option>
               ))}
             </select>

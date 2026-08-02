@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Loader2, Save, X } from "lucide-react";
 import MathText from "./MathText";
 
-type Test = { id: string; title: string };
+type Test = { id: string; title: string; questions_count?: number };
 
 export type QuestionFormValues = {
   test_id: string;
@@ -74,7 +74,7 @@ export default function SingleQuestionForm({ tests, initial, onSaved, onCancelEd
         <option value="">Select a test…</option>
         {tests.map((t) => (
           <option key={t.id} value={t.id}>
-            {t.title}
+            {t.title} — {t.questions_count ?? 0} question{t.questions_count === 1 ? "" : "s"}
           </option>
         ))}
       </select>

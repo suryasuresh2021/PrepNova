@@ -5,7 +5,7 @@ import Papa from "papaparse";
 import { Upload, Loader2, Check } from "lucide-react";
 import MathText from "./MathText";
 
-type Test = { id: string; title: string };
+type Test = { id: string; title: string; questions_count?: number };
 
 type ParsedRow = {
   question_text: string;
@@ -96,7 +96,7 @@ export default function BulkQuestionUpload({ tests }: { tests: Test[] }) {
         <option value="">Select a test to add these questions to…</option>
         {tests.map((t) => (
           <option key={t.id} value={t.id}>
-            {t.title}
+            {t.title} — {t.questions_count ?? 0} question{t.questions_count === 1 ? "" : "s"}
           </option>
         ))}
       </select>

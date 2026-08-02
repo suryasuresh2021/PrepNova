@@ -317,6 +317,20 @@ Client Components to handle typing — can use the exact same access logic inste
 change.
 
 
+## 14. Question counts, and category-level counts on the user side
+
+**Question counts in the admin** — `/admin/tests` now shows how many questions each test already
+has (e.g. "12 questions" in teal, or "0 questions" in amber so empty tests stand out). The same
+count shows in every test dropdown across the Question Bank (Add Single, Bulk Upload, AI Generate),
+so it's obvious at a glance which tests still need content.
+
+**Category-level counts for students** — `/courses` now shows a "X materials · Y tests" summary
+next to each Category's name, not just per-topic. While making this change, I also fixed a real gap:
+Materials that aren't tied to a specific Topic (the "no specific topic" option when adding a
+Material) were being counted but never actually *shown* anywhere on `/courses` — they now appear in
+a "General [Category] Materials" section per category, above its topics.
+
+
 ## 12. PDF upload, question explanations, and Topic → Materials/Tests linking
 
 **PDF upload for Materials** — when adding a Material and choosing type **PDF**, there's now an
