@@ -331,6 +331,19 @@ Material) were being counted but never actually *shown* anywhere on `/courses` �
 a "General [Category] Materials" section per category, above its topics.
 
 
+## 15. A Material can now have a PDF *and* a video link together
+
+Previously, adding a Material forced a choice — Link, PDF, Video, or Note — and each material could
+only hold one of those. `/admin/materials` now shows all four fields at once (upload/paste a
+document, paste a video URL, write a note), and you fill in **any combination** — a PDF plus your
+YouTube link on the same material works fine now. The "type" dropdown still exists, but it now only
+picks which icon shows next to the material in the list — it doesn't restrict which fields you can
+fill in.
+
+On `/materials`, students see a separate "Open Document" and/or "Watch Video" link for whichever
+resources are actually present on that material, plus an expandable note if there's one too.
+
+
 ## 12. PDF upload, question explanations, and Topic → Materials/Tests linking
 
 **PDF upload for Materials** — when adding a Material and choosing type **PDF**, there's now an

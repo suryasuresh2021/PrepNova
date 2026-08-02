@@ -106,30 +106,42 @@ export default function MaterialsBrowser({ categories, materials, completedIds, 
                           </p>
                         ) : (
                           <>
-                            {m.material_type === "note" ? (
-                              m.content ? (
-                                <details className="mt-4">
-                                  <summary className="cursor-pointer font-body text-sm font-semibold text-teal-700 hover:text-teal-800">
-                                    Read note
-                                  </summary>
-                                  <p className="font-body mt-2 whitespace-pre-wrap text-sm text-slate-700">
-                                    {m.content}
-                                  </p>
-                                </details>
-                              ) : (
-                                <p className="font-body mt-4 text-sm text-slate-400">Content coming soon</p>
-                              )
-                            ) : m.url ? (
-                              <a
-                                href={m.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="font-body mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-teal-700 hover:text-teal-800"
-                              >
-                                Open <ExternalLink size={14} aria-hidden="true" />
-                              </a>
-                            ) : (
-                              <p className="font-body mt-4 text-sm text-slate-400">Link coming soon</p>
+                            <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
+                              {m.url && (
+                                <a
+                                  href={m.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="font-body inline-flex items-center gap-1.5 text-sm font-semibold text-teal-700 hover:text-teal-800"
+                                >
+                                  Open Document <ExternalLink size={14} aria-hidden="true" />
+                                </a>
+                              )}
+                              {m.video_url && (
+                                <a
+                                  href={m.video_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="font-body inline-flex items-center gap-1.5 text-sm font-semibold text-teal-700 hover:text-teal-800"
+                                >
+                                  Watch Video <ExternalLink size={14} aria-hidden="true" />
+                                </a>
+                              )}
+                            </div>
+
+                            {m.content && (
+                              <details className="mt-2">
+                                <summary className="cursor-pointer font-body text-sm font-semibold text-teal-700 hover:text-teal-800">
+                                  Read note
+                                </summary>
+                                <p className="font-body mt-2 whitespace-pre-wrap text-sm text-slate-700">
+                                  {m.content}
+                                </p>
+                              </details>
+                            )}
+
+                            {!m.url && !m.video_url && !m.content && (
+                              <p className="font-body mt-4 text-sm text-slate-400">Content coming soon</p>
                             )}
 
                             {isLoggedIn && (

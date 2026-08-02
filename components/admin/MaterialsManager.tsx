@@ -13,6 +13,7 @@ type Material = {
   description: string | null;
   material_type: "link" | "pdf" | "video" | "note";
   url: string | null;
+  video_url: string | null;
   content: string | null;
   is_premium: boolean;
   categories: { name: string } | null;
@@ -26,6 +27,7 @@ const emptyForm = {
   description: "",
   material_type: "link" as Material["material_type"],
   url: "",
+  video_url: "",
   content: "",
   is_premium: false,
 };
@@ -68,6 +70,12 @@ export default function MaterialsManager() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!form.url && !form.video_url && !form.content) {
+      setError("Add at least one of: a document/link, a video URL, or note content.");
+      return;
+    }
+
     setSaving(true);
     setError(null);
 
@@ -121,14 +129,17 @@ export default function MaterialsManager() {
       description: m.description || "",
       material_type: m.material_type,
       url: m.url || "",
+      video_url: m.video_url || "",
       content: m.content || "",
       is_premium: m.is_premium,
     });
+    setError(null);
   };
 
   const cancelEdit = () => {
     setEditingId(null);
     setForm(emptyForm);
+    setError(null);
   };
 
   const handleDelete = async (id: string) => {
@@ -147,7 +158,6 @@ export default function MaterialsManager() {
     );
   }
 
-  const needsUrl = form.material_type === "link" || form.material_type === "pdf" || form.material_type === "video";
   const topicsForCategory = topics.filter((t) => t.category_id === form.category_id);
 
   return (
@@ -181,23 +191,12 @@ export default function MaterialsManager() {
           ))}
         </select>
 
-        <select
-          value={form.material_type}
-          onChange={(e) => setForm({ ...form, material_type: e.target.value as Material["material_type"] })}
-          className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:border-teal-500 focus:outline-none"
-        >
-          <option value="link">Link</option>
-          <option value="pdf">PDF</option>
-          <option value="video">Video</option>
-          <option value="note">Note (text)</option>
-        </select>
-
         <input
           required
           placeholder="Title"
           value={form.title}
           onChange={(e) => setForm({ ...form, title: e.target.value })}
-          className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:border-teal-500 focus:outline-none"
+          className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:border-teal-500 focus:outline-none sm:col-span-2"
         />
 
         <input
@@ -207,8 +206,26 @@ export default function MaterialsManager() {
           className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:border-teal-500 focus:outline-none sm:col-span-2"
         />
 
-        {form.material_type === "pdf" && (
-          <div className="rounded-lg border-2 border-dashed border-slate-300 p-4 text-center sm:col-span-2">
+        <select
+          value={form.material_type}
+          onChange={(e) => setForm({ ...form, material_type: e.target.value as Material["material_type"] })}
+          className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:border-teal-500 focus:outline-none sm:col-span-2"
+        >
+          <option value="link">Icon: Link</option>
+          <option value="pdf">Icon: PDF</option>
+          <option value="video">Icon: Video</option>
+          <option value="note">Icon: Note</option>
+        </select>
+        <p className="-mt-2 font-body text-xs text-slate-400 sm:col-span-2">
+          This only picks which icon shows to students — fill in any combination of the fields
+          below, they all work together on one material.
+        </p>
+
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 sm:col-span-2">
+          <p className="font-body mb-2 flex items-center gap-1.5 text-sm font-semibold text-slate-700">
+            <FileText size={14} aria-hidden="true" /> Document / PDF
+          </p>
+          <div className="rounded-lg border-2 border-dashed border-slate-300 bg-white p-4 text-center">
             <Upload size={18} className="mx-auto text-slate-400" aria-hidden="true" />
             <label className="mt-1.5 block cursor-pointer font-body text-sm font-medium text-teal-700 hover:text-teal-800">
               {uploading ? "Uploading…" : "Upload a PDF file"}
@@ -220,32 +237,46 @@ export default function MaterialsManager() {
                 onChange={(e) => e.target.files?.[0] && handlePdfUpload(e.target.files[0])}
               />
             </label>
-            <p className="font-body mt-1 text-xs text-slate-400">Up to 15MB — or paste a URL below instead</p>
+            <p className="font-body mt-1 text-xs text-slate-400">Up to 15MB</p>
             {form.url && (
               <p className="font-body mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-teal-700">
-                <CheckCircle2 size={13} aria-hidden="true" /> File ready
+                <CheckCircle2 size={13} aria-hidden="true" /> File/link ready
               </p>
             )}
             {uploadError && <p className="font-body mt-2 text-xs text-red-600">{uploadError}</p>}
           </div>
-        )}
-
-        {needsUrl ? (
           <input
-            placeholder="URL (https://...) — optional, can be added later"
+            placeholder="…or paste a document/link URL directly"
             value={form.url}
             onChange={(e) => setForm({ ...form, url: e.target.value })}
-            className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:border-teal-500 focus:outline-none sm:col-span-2"
+            className="mt-3 w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:border-teal-500 focus:outline-none"
           />
-        ) : (
+        </div>
+
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 sm:col-span-2">
+          <p className="font-body mb-2 flex items-center gap-1.5 text-sm font-semibold text-slate-700">
+            <Video size={14} aria-hidden="true" /> Video link
+          </p>
+          <input
+            placeholder="https://youtube.com/watch?v=... (or any video URL)"
+            value={form.video_url}
+            onChange={(e) => setForm({ ...form, video_url: e.target.value })}
+            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm focus:border-teal-500 focus:outline-none"
+          />
+        </div>
+
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 sm:col-span-2">
+          <p className="font-body mb-2 flex items-center gap-1.5 text-sm font-semibold text-slate-700">
+            <StickyNote size={14} aria-hidden="true" /> Note text
+          </p>
           <textarea
-            placeholder="Note content (optional, can be added later)"
+            placeholder="Optional written note or summary"
             value={form.content}
             onChange={(e) => setForm({ ...form, content: e.target.value })}
             rows={3}
-            className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:border-teal-500 focus:outline-none sm:col-span-2"
+            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm focus:border-teal-500 focus:outline-none"
           />
-        )}
+        </div>
 
         <label className="flex items-center gap-2 font-body text-sm text-slate-700 sm:col-span-2">
           <input
@@ -290,6 +321,7 @@ export default function MaterialsManager() {
           <ul className="mt-4 divide-y divide-slate-100">
             {materials.map((m) => {
               const Icon = typeIcons[m.material_type] || Link2;
+              const resourceCount = [m.url, m.video_url, m.content].filter(Boolean).length;
               return (
                 <li key={m.id} className="flex items-center justify-between gap-4 py-3">
                   <div className="flex items-start gap-3">
@@ -298,7 +330,8 @@ export default function MaterialsManager() {
                       <p className="font-body text-sm font-semibold text-slate-900">{m.title}</p>
                       <p className="font-body text-xs text-slate-500">
                         {m.categories?.name}
-                        {m.topics?.name ? ` · ${m.topics.name}` : ""} ·{" "}
+                        {m.topics?.name ? ` · ${m.topics.name}` : ""} · {resourceCount} resource
+                        {resourceCount === 1 ? "" : "s"} ·{" "}
                         <span className={m.is_premium ? "text-amber-700" : "text-teal-700"}>
                           {m.is_premium ? "Premium" : "Free"}
                         </span>

@@ -19,7 +19,8 @@ export async function POST(request) {
   const admin = await requireAdmin();
   if (!admin) return NextResponse.json({ error: "Not authorized" }, { status: 403 });
 
-  const { category_id, topic_id, title, description, material_type, url, content, is_premium } = await request.json();
+  const { category_id, topic_id, title, description, material_type, url, video_url, content, is_premium } =
+    await request.json();
 
   if (!category_id || !title) {
     return NextResponse.json({ error: "Category and title are required" }, { status: 400 });
@@ -34,6 +35,7 @@ export async function POST(request) {
       description: description || "",
       material_type: material_type || "link",
       url: url || null,
+      video_url: video_url || null,
       content: content || null,
       is_premium: Boolean(is_premium),
     })

@@ -285,3 +285,19 @@ alter table materials add column if not exists topic_id uuid references topics(i
 -- ============================================================
 
 alter table tests add column if not exists topic_id uuid references topics(id) on delete set null;
+
+
+-- ============================================================
+-- Optional second link on a Material — e.g. attach a YouTube video
+-- alongside an uploaded PDF, instead of being forced to pick only one.
+-- ============================================================
+
+alter table materials add column if not exists video_url text;
+
+
+-- ============================================================
+-- A Material can now have a document/link URL AND a separate video URL
+-- at the same time (e.g. a PDF plus a YouTube link on one item).
+-- ============================================================
+
+alter table materials add column if not exists video_url text;
