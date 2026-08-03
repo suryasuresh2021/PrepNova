@@ -1,10 +1,25 @@
 "use client";
 
+import Link from "next/link";
 import { Rocket, Facebook, Twitter, Instagram, Linkedin, Youtube, Mail, Phone, MapPin } from "lucide-react";
 
 const footerColumns = [
-  { title: "Company", links: ["About", "Courses", "Pricing", "Contact"] },
-  { title: "Legal", links: ["Privacy Policy", "Terms & Conditions"] },
+  {
+    title: "Company",
+    links: [
+      { label: "About", href: "/about" },
+      { label: "Courses", href: "/courses" },
+      { label: "Pricing", href: "/#pricing" },
+      { label: "Contact", href: "/contact" },
+    ],
+  },
+  {
+    title: "Legal",
+    links: [
+      { label: "Privacy Policy", href: "/#" },
+      { label: "Terms & Conditions", href: "/#" },
+    ],
+  },
 ];
 
 const socials = [
@@ -47,10 +62,10 @@ const Footer = () => (
           <h4 className="font-body text-sm font-semibold text-white">{col.title}</h4>
           <ul className="mt-4 space-y-2">
             {col.links.map((link) => (
-              <li key={link}>
-                <a href="#" className="font-body text-sm transition hover:text-white">
-                  {link}
-                </a>
+              <li key={link.label}>
+                <Link href={link.href} className="font-body text-sm transition hover:text-white">
+                  {link.label}
+                </Link>
               </li>
             ))}
           </ul>
@@ -61,7 +76,10 @@ const Footer = () => (
         <h4 className="font-body text-sm font-semibold text-white">Contact</h4>
         <ul className="mt-4 space-y-3 font-body text-sm">
           <li className="flex items-start gap-2">
-            <Mail size={16} className="mt-0.5 flex-shrink-0" aria-hidden="true" /> support@prepnova.app
+            <Mail size={16} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
+            <a href="mailto:prepnova.co.support@gmail.com" className="hover:text-white">
+              prepnova.co.support@gmail.com
+            </a>
           </li>
           <li className="flex items-start gap-2">
             <Phone size={16} className="mt-0.5 flex-shrink-0" aria-hidden="true" /> +91 00000 00000

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Star } from "lucide-react";
 import { PrimaryButton, SecondaryButton } from "./ui/Button";
@@ -24,10 +25,14 @@ const Hero = () => (
           One platform for Placement Preparation, Interview Readiness, and Competitive Exam Success.
         </p>
         <div className="mt-8 flex flex-wrap gap-4">
-          <PrimaryButton>
-            Start Free <ArrowRight size={16} aria-hidden="true" />
-          </PrimaryButton>
-          <SecondaryButton>Explore Courses</SecondaryButton>
+          <Link href="/login">
+            <PrimaryButton>
+              Start Free <ArrowRight size={16} aria-hidden="true" />
+            </PrimaryButton>
+          </Link>
+          <Link href="/courses">
+            <SecondaryButton>Explore Courses</SecondaryButton>
+          </Link>
         </div>
         <div className="mt-10 flex items-center gap-6 font-body text-sm text-slate-500">
           <div className="flex items-center gap-1">

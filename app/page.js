@@ -3,22 +3,40 @@ import Hero from "@/components/Hero";
 import Categories from "@/components/Categories";
 import WhyChooseUs from "@/components/WhyChooseUs";
 import LearningJourney from "@/components/LearningJourney";
+import LatestConcepts from "@/components/LatestConcepts";
 import Pricing from "@/components/Pricing";
 import Testimonials from "@/components/Testimonials";
 import AdUnit from "@/components/AdUnit";
 import FAQ from "@/components/FAQ";
 import CTA from "@/components/CTA";
 import Footer from "@/components/Footer";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-export default function Home() {
+export default async function Home() {
+  const [{ data: categories }, { data: latestConcepts }] = await Promise.all([
+    supabaseAdmin.from("categories").select("id, name"),
+    supabaseAdmin
+      .from("concepts")
+      .select("id, title, explanation, topics(name, categories(name))")
+      .eq("is_premium", false)
+      .order("created_at", { ascending: false })
+      .limit(6),
+  ]);
+
+  const categoryLinks = {};
+  (categories || []).forEach((c) => {
+    categoryLinks[c.name.toLowerCase()] = `/courses/${c.id}`;
+  });
+
   return (
     <>
       <Navbar />
       <main>
         <Hero />
-        <Categories />
+        <Categories categoryLinks={categoryLinks} />
         <WhyChooseUs />
         <LearningJourney />
+        <LatestConcepts concepts={latestConcepts || []} />
         <Pricing />
         <Testimonials />
         <div className="mx-auto max-w-4xl px-6">

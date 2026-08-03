@@ -295,6 +295,38 @@ The student Dashboard now links to both pages under "Browse Courses" / "Browse M
 - The "Free vs Premium" rule is a simple flag per item — no per-category or time-limited free trial
 
 
+## 16. Concepts, real content pages, and a working homepage
+
+**Concepts** — a new content type: `/admin/concepts` lets you add explanations and worked examples
+under Category → Topic → Concept, with the same live math preview as everywhere else ($...$ for
+inline, works in both the explanation and examples fields). **Concepts are public by default** —
+viewable without logging in — unless you check "Premium only" on a specific one, in which case a
+locked teaser shows instead of the full content until the reader is Premium.
+
+**Homepage "Latest Concepts"** — the 6 most recently added Free concepts appear automatically in a
+new homepage section, with math rendering, no extra step needed when you publish one.
+
+**Category pages are real now** — each of the "Six Pillars" cards on the homepage (plus a new
+7th card, **UGC-CSIR**) links to `/courses/[id]` for that specific Category, showing every Topic's
+Concepts, Materials, and Tests in one place — the same view `/courses` uses for the full list. If a
+card's name doesn't match any Category you've actually created yet, it falls back to the general
+`/courses` page rather than a dead link.
+
+**Fixed:**
+- Homepage **Start Free** now goes to `/login`, **Explore Courses** to `/courses` (previously
+  neither button was linked to anything)
+- **About** and **Contact** now have real pages instead of placeholder `#` links — Contact uses
+  `prepnova.co.support@gmail.com` as a mailto link
+- A real bug in the concept detail page: it was reading a field called `concept.example`, but the
+  database column (and the admin form) uses `examples` — worked examples were silently never
+  showing up. Fixed to read the correct field.
+
+**What's still login-protected, unchanged:** taking a test, `/dashboard`, `/results`, and the whole
+`/admin` area. **What's public, as requested:** browsing Courses, Materials listings, and Concepts —
+consistent with the idea that educational content should be discoverable without an account, while
+anything personalized or paid stays behind login.
+
+
 ## 13. Search everywhere, and Test editing
 
 **Search** — added in three places, all instant (filters what's already loaded, no extra network

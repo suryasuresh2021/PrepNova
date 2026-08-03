@@ -301,3 +301,77 @@ alter table materials add column if not exists video_url text;
 -- ============================================================
 
 alter table materials add column if not exists video_url text;
+
+
+-- ============================================================
+-- Concepts — public educational content: Category → Topic → Concept
+-- Deliberately public (no login required) — this is indexable, marketing-
+-- friendly content, unlike Tests/Materials which stay gated.
+-- ============================================================
+
+create table if not exists concepts (
+  id uuid primary key default gen_random_uuid(),
+  category_id uuid references categories(id) on delete cascade,
+  topic_id uuid references topics(id) on delete set null,
+  title text not null,
+  explanation text,
+  examples text,
+  reference_url text,
+  created_at timestamptz not null default now()
+);
+
+alter table concepts enable row level security;
+
+drop policy if exists "Concepts are publicly readable" on concepts;
+create policy "Concepts are publicly readable"
+  on concepts for select
+  using (true);
+
+
+-- ============================================================
+-- Concepts — Category → Topic → Concept, with explanation + example.
+-- Public educational content (when not premium) — viewable without login,
+-- same pattern as free Materials.
+-- ============================================================
+
+create table if not exists concepts (
+  id uuid primary key default gen_random_uuid(),
+  topic_id uuid references topics(id) on delete cascade not null,
+  title text not null,
+  explanation text,
+  example text,
+  is_premium boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+alter table concepts enable row level security;
+-- No public policy — same pattern as materials. Concepts are served only through
+-- server components/API routes using the service role, which check is_premium
+-- against the visitor's subscription before rendering explanation/example. This
+-- matters because a public RLS SELECT policy would let anyone read a Premium
+-- concept's content directly via the anon key, bypassing the paywall entirely.
+
+
+-- ============================================================
+-- Concepts — Category → Topic → Concept: explanations, examples,
+-- and text-based material. Public by default (is_premium = false),
+-- so this content is viewable without login unless an admin marks
+-- a specific concept Premium.
+-- ============================================================
+
+create table if not exists concepts (
+  id uuid primary key default gen_random_uuid(),
+  topic_id uuid references topics(id) on delete cascade not null,
+  title text not null,
+  explanation text not null,
+  examples text,
+  is_premium boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+alter table concepts enable row level security;
+
+drop policy if exists "Concepts are publicly readable" on concepts;
+create policy "Concepts are publicly readable"
+  on concepts for select
+  using (true);

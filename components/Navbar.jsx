@@ -14,8 +14,8 @@ const navLinks = [
   { label: "Materials", href: "/materials" },
   { label: "Mock Tests", href: "/tests" },
   { label: "Pricing", href: "/#pricing" },
-  { label: "About", href: "/#" },
-  { label: "Contact", href: "/#" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
 ];
 
 const Navbar = () => {
