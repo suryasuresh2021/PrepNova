@@ -1,4 +1,1 @@
-# Replace pub-0000000000000000 below with your real AdSense Publisher ID
-# (find it at adsense.google.com > Account > Account information).
-# This file must be reachable at https://your-domain/ads.txt for AdSense to verify your site.
-google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+google.com, pub-7602638382687586, DIRECT, f08c47fec0942fa0

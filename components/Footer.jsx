@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Rocket, Facebook, Twitter, Instagram, Linkedin, Youtube, Mail, Phone, MapPin } from "lucide-react";
+import { Rocket, Mail, MapPin } from "lucide-react";
 
 const footerColumns = [
   {
@@ -16,18 +16,10 @@ const footerColumns = [
   {
     title: "Legal",
     links: [
-      { label: "Privacy Policy", href: "/#" },
-      { label: "Terms & Conditions", href: "/#" },
+      { label: "Privacy Policy", href: "/privacy" },
+      { label: "Terms & Conditions", href: "/terms" },
     ],
   },
-];
-
-const socials = [
-  { icon: Facebook, label: "Facebook" },
-  { icon: Twitter, label: "Twitter" },
-  { icon: Instagram, label: "Instagram" },
-  { icon: Linkedin, label: "LinkedIn" },
-  { icon: Youtube, label: "YouTube" },
 ];
 
 const Footer = () => (
@@ -43,18 +35,6 @@ const Footer = () => (
         <p className="font-body mt-4 text-sm leading-relaxed">
           Placement preparation, interview readiness, and competitive exam success — all in one place.
         </p>
-        <div className="mt-5 flex gap-3">
-          {socials.map(({ icon: Icon, label }) => (
-            <a
-              key={label}
-              href="#"
-              aria-label={label}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-700 transition hover:border-amber-400 hover:text-amber-400"
-            >
-              <Icon size={16} aria-hidden="true" />
-            </a>
-          ))}
-        </div>
       </div>
 
       {footerColumns.map((col) => (
@@ -80,9 +60,6 @@ const Footer = () => (
             <a href="mailto:prepnova.co.support@gmail.com" className="hover:text-white">
               prepnova.co.support@gmail.com
             </a>
-          </li>
-          <li className="flex items-start gap-2">
-            <Phone size={16} className="mt-0.5 flex-shrink-0" aria-hidden="true" /> +91 00000 00000
           </li>
           <li className="flex items-start gap-2">
             <MapPin size={16} className="mt-0.5 flex-shrink-0" aria-hidden="true" /> Chennai, India

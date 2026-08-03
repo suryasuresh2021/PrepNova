@@ -327,6 +327,22 @@ consistent with the idea that educational content should be discoverable without
 anything personalized or paid stays behind login.
 
 
+## 17. Footer cleanup, real legal pages, and two dead buttons fixed
+
+- Removed the Facebook/Twitter/Instagram/LinkedIn/YouTube icons from the footer (they linked to
+  `#`) and the placeholder phone number — easy to add both back later once there are real accounts
+  and a real number to show
+- **Privacy Policy** (`/privacy`) and **Terms & Conditions** (`/terms`) are now real pages, linked
+  from the footer's "Legal" column instead of going nowhere. They cover the actual services this
+  site uses — Supabase, Razorpay, AdSense — and the real practicalities (refunds, AI-assisted
+  content, account termination). **Worth being upfront about:** this is solid boilerplate, not a
+  substitute for a lawyer — especially given India's DPDP Act 2023 governs how personal data is
+  handled, and you're processing both payments and user data. Worth a professional review before
+  you're handling real users' money and personal information at scale.
+- Fixed two buttons that did nothing: the bottom-of-homepage **"Register Free"** now goes to
+  `/login`, and **"View Courses"** now goes to `/courses`.
+
+
 ## 13. Search everywhere, and Test editing
 
 **Search** — added in three places, all instant (filters what's already loaded, no extra network

@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-const CLIENT_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
+const CLIENT_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID || "ca-pub-7602638382687586";
 
 export default function AdUnit({ slot, format = "auto", className = "" }) {
   useEffect(() => {
