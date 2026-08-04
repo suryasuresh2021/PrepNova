@@ -1,53 +1,66 @@
-import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
-import Categories from "@/components/Categories";
-import WhyChooseUs from "@/components/WhyChooseUs";
-import LearningJourney from "@/components/LearningJourney";
-import LatestConcepts from "@/components/LatestConcepts";
-import Pricing from "@/components/Pricing";
-import Testimonials from "@/components/Testimonials";
-import dynamic from "next/dynamic";
-import FAQ from "@/components/FAQ";
-import CTA from "@/components/CTA";
-import Footer from "@/components/Footer";
+export default function sitemap() {
+  const baseUrl = "https://www.prepnova.co.in";
 
-const AdUnit = dynamic(() => import("@/components/AdUnit"), { ssr: false });
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
-
-export default async function Home() {
-  const [{ data: categories }, { data: latestConcepts }] = await Promise.all([
-    supabaseAdmin.from("categories").select("id, name"),
-    supabaseAdmin
-      .from("concepts")
-      .select("id, title, explanation, topics(name, categories(name))")
-      .eq("is_premium", false)
-      .order("created_at", { ascending: false })
-      .limit(6),
-  ]);
-
-  const categoryLinks = {};
-  (categories || []).forEach((c) => {
-    categoryLinks[c.name.toLowerCase()] = `/courses/${c.id}`;
-  });
-
-  return (
-    <>
-      <Navbar />
-      <main>
-        <Hero />
-        <Categories categoryLinks={categoryLinks} />
-        <WhyChooseUs />
-        <LearningJourney />
-        <LatestConcepts concepts={latestConcepts || []} />
-        <Pricing />
-        <Testimonials />
-        <div className="mx-auto max-w-4xl px-6">
-          <AdUnit slot="0000000000" />
-        </div>
-        <FAQ />
-        <CTA />
-      </main>
-      <Footer />
-    </>
-  );
+  return [
+    {
+      url: `${baseUrl}/`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 1,
+    },
+    {
+      url: `${baseUrl}/about`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/concepts`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/contact`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/courses`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/materials`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/privacy`,
+      lastModified: new Date(),
+      changeFrequency: "yearly",
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/results`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/terms`,
+      lastModified: new Date(),
+      changeFrequency: "yearly",
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/tests`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+  ];
 }
